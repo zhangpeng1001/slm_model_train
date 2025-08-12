@@ -65,3 +65,4 @@ src/secret.py
 
 #模型数据比较大，不进行提交
 src/transformers_one/model
+src/dataset/datasets
