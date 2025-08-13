@@ -1,17 +1,19 @@
 """
-简化版问答模型
-不依赖sklearn，使用基础的文本匹配和BERT语义理解
+基于BERT的问答模型
+结合知识库和BERT模型进行事实性问答
 """
-import torch
-from transformers import BertTokenizer, BertModel
-from knowledge_base import DataPlatformKnowledgeBase
 import numpy as np
-import math
+import torch
+from sklearn.metrics.pairwise import cosine_similarity
+from transformers import BertTokenizer, BertModel
+
+from knowledge_base import DataPlatformKnowledgeBase
+
 
 class SimpleDataPlatformQAModel:
     def __init__(self, model_path=None):
         """
-        初始化简化版问答模型
+        初始化问答模型
         """
         # 设备配置
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -68,7 +70,8 @@ class SimpleDataPlatformQAModel:
         
         return embedding.flatten()
     
-    def _cosine_similarity(self, vec1, vec2):
+    @staticmethod
+    def _cosine_similarity(vec1, vec2):
         """
         计算两个向量的余弦相似度
         """
@@ -97,9 +100,11 @@ class SimpleDataPlatformQAModel:
         best_match = None
         
         for kb_question, kb_embedding in self.question_embeddings.items():
-            # 计算余弦相似度
+            # 计算余弦相似度 - 依赖sklearn
+            # similarity = cosine_similarity(user_embedding, kb_embedding)[0][0]
+            # 计算余弦相似度 - 不依赖sklearn
             similarity = self._cosine_similarity(user_embedding, kb_embedding)
-            
+
             if similarity > max_similarity and similarity > threshold:
                 max_similarity = similarity
                 best_match = kb_question

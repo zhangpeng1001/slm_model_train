@@ -126,12 +126,12 @@ class DataPlatformQASystem:
             })
         return results
 
-def main():
-    """
-    主函数 - 启动问答系统
-    """
-    qa_system = DataPlatformQASystem()
-    qa_system.interactive_mode()
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     """
+#     主函数 - 启动问答系统
+#     """
+#     qa_system = DataPlatformQASystem()
+#     qa_system.interactive_mode()
+#
+# if __name__ == "__main__":
+#     main()
