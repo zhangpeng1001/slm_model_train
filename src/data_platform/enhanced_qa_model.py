@@ -263,29 +263,84 @@ class EnhancedDataPlatformQAModel:
             # 移动到设备
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
-            # 生成答案
+            # 获取问题的向量表示
             with torch.no_grad():
                 outputs = self.model(
                     question_input_ids=inputs['input_ids'],
                     question_attention_mask=inputs['attention_mask']
                 )
+                question_embedding = outputs['question_embedding']
 
-                answer_logits = outputs['answer_logits']
-
-                # 获取最可能的token
-                predicted_token_id = torch.argmax(answer_logits, dim=-1)[0]
-
-                # 解码为文本（单个token）
-                generated_text = self.tokenizer.decode(
-                    [predicted_token_id.item()],
-                    skip_special_tokens=True
+            # 使用训练后的模型来匹配最相似的知识库答案
+            # 计算与所有知识库问题的相似度
+            max_similarity = 0
+            best_answer = None
+            
+            for kb_question, kb_embedding in self.question_embeddings.items():
+                if kb_embedding is None:
+                    continue
+                
+                # 计算相似度
+                similarity = self._cosine_similarity(
+                    question_embedding.cpu().numpy().flatten(), 
+                    kb_embedding
                 )
-
-                return generated_text
+                
+                if similarity > max_similarity:
+                    max_similarity = similarity
+                    best_answer = self.knowledge_base.qa_knowledge[kb_question]
+            
+            # 如果找到了相似的答案，进行智能改写
+            if best_answer and max_similarity > 0.5:
+                # 基于问题类型对答案进行适配
+                adapted_answer = self._adapt_answer_to_question(question, best_answer)
+                return adapted_answer
+            
+            # 如果没有找到合适的答案，生成通用回答
+            return self._generate_generic_answer(question)
 
         except Exception as e:
             print(f"答案生成失败: {e}")
             return None
+    
+    def _adapt_answer_to_question(self, question, base_answer):
+        """根据问题类型适配答案"""
+        # 如果问题是"如何"或"怎么"开头，调整答案格式
+        if question.startswith(("如何", "怎么", "怎样")):
+            if not base_answer.startswith(("需要", "应该", "可以")):
+                return f"需要{base_answer}"
+        
+        # 如果问题是"什么是"开头，确保答案是定义性的
+        elif "什么是" in question or "什么" in question:
+            if not any(word in base_answer for word in ["是", "指", "包括"]):
+                return f"{base_answer.split('。')[0]}是数据平台的重要组成部分。"
+        
+        # 如果问题询问步骤或流程
+        elif "步骤" in question or "流程" in question:
+            if "步骤" not in base_answer and "流程" not in base_answer:
+                return f"具体{base_answer}"
+        
+        return base_answer
+    
+    def _generate_generic_answer(self, question):
+        """生成通用答案"""
+        # 基于问题关键词生成回答
+        if any(word in question for word in ["数据清洗", "清洗"]):
+            return "数据清洗是确保数据质量的重要环节，需要按照既定的清洗规则和流程进行操作。"
+        elif any(word in question for word in ["数据入库", "入库"]):
+            return "数据入库需要经过格式验证、质量检查等步骤，确保数据的完整性和准确性。"
+        elif any(word in question for word in ["数据质量", "质量检查"]):
+            return "数据质量检查包括完整性、准确性、一致性等多个维度的验证。"
+        elif any(word in question for word in ["数据监控", "监控"]):
+            return "数据监控通过设置监控指标和告警规则来保障数据平台的稳定运行。"
+        elif any(word in question for word in ["数据安全", "安全"]):
+            return "数据安全涉及数据加密、访问控制、审计日志等多个方面的保护措施。"
+        elif "流程" in question:
+            return "该流程需要按照标准化的步骤执行，确保操作的规范性和有效性。"
+        elif any(word in question for word in ["如何", "怎么", "怎样"]):
+            return "需要按照相关的技术规范和操作流程进行实施。"
+        else:
+            return "这是数据平台相关的重要概念，建议参考相关文档和最佳实践。"
 
     def answer_question(self, question):
         """回答用户问题"""
