@@ -66,5 +66,6 @@ src/secret.py
 #模型数据比较大，不进行提交
 src/transformers_one/model
 src/train/trained_models
+src/train/trained_classifiers
 src/dataset/datasets
 src/dataset/data
