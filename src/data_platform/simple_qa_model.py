@@ -17,35 +17,35 @@ class SimpleDataPlatformQAModel:
         """
         # 设备配置
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        
+
         # 模型路径
         if model_path is None:
             self.model_path = r"E:\project\python\slm_model_train\src\transformers_one\model\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
         else:
             self.model_path = model_path
-        
+
         # 加载BERT模型和分词器
         self.tokenizer = BertTokenizer.from_pretrained(self.model_path)
         self.bert_model = BertModel.from_pretrained(self.model_path).to(self.device)
         self.bert_model.eval()
-        
+
         # 加载知识库
         self.knowledge_base = DataPlatformKnowledgeBase()
-        
+
         # 预计算知识库中问题的向量表示
         self._precompute_question_embeddings()
-    
+
     def _precompute_question_embeddings(self):
         """
         预计算知识库中所有问题的向量表示
         """
         self.question_embeddings = {}
         questions = list(self.knowledge_base.qa_knowledge.keys())
-        
+
         for question in questions:
             embedding = self._get_text_embedding(question)
             self.question_embeddings[question] = embedding
-    
+
     def _get_text_embedding(self, text):
         """
         获取文本的BERT向量表示
@@ -58,18 +58,18 @@ class SimpleDataPlatformQAModel:
             padding=True,
             max_length=512
         )
-        
+
         # 移动到设备
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
-        
+
         # 获取BERT输出
         with torch.no_grad():
             outputs = self.bert_model(**inputs)
             # 使用[CLS]标记的向量作为文本表示
             embedding = outputs.last_hidden_state[:, 0, :].cpu().numpy()
-        
+
         return embedding.flatten()
-    
+
     @staticmethod
     def _cosine_similarity(vec1, vec2):
         """
@@ -77,40 +77,40 @@ class SimpleDataPlatformQAModel:
         """
         # 计算点积
         dot_product = np.dot(vec1, vec2)
-        
+
         # 计算向量的模长
         norm1 = np.linalg.norm(vec1)
         norm2 = np.linalg.norm(vec2)
-        
+
         # 避免除零错误
         if norm1 == 0 or norm2 == 0:
             return 0
-        
+
         # 计算余弦相似度
         similarity = dot_product / (norm1 * norm2)
         return similarity
-    
+
     def find_most_similar_question(self, user_question, threshold=0.7):
         """
         找到与用户问题最相似的知识库问题
         """
         user_embedding = self._get_text_embedding(user_question)
-        
+
         max_similarity = 0
         best_match = None
-        
+
         for kb_question, kb_embedding in self.question_embeddings.items():
             # 计算余弦相似度 - 依赖sklearn
-            # similarity = cosine_similarity(user_embedding, kb_embedding)[0][0]
+            similarity = cosine_similarity(user_embedding.reshape(1, -1), kb_embedding.reshape(1, -1))[0][0]
             # 计算余弦相似度 - 不依赖sklearn
-            similarity = self._cosine_similarity(user_embedding, kb_embedding)
+            # similarity = self._cosine_similarity(user_embedding, kb_embedding)
 
             if similarity > max_similarity and similarity > threshold:
                 max_similarity = similarity
                 best_match = kb_question
-        
+
         return best_match, max_similarity
-    
+
     def answer_question(self, question):
         """
         回答用户问题
@@ -123,10 +123,10 @@ class SimpleDataPlatformQAModel:
                 "method": "direct_match",
                 "confidence": 1.0
             }
-        
+
         # 如果直接匹配失败，使用语义相似度匹配
         best_match, similarity = self.find_most_similar_question(question)
-        
+
         if best_match:
             answer = self.knowledge_base.qa_knowledge[best_match]
             return {
@@ -141,13 +141,13 @@ class SimpleDataPlatformQAModel:
                 "method": "no_match",
                 "confidence": 0.0
             }
-    
+
     def get_available_topics(self):
         """
         获取可回答的主题列表
         """
         return self.knowledge_base.get_all_topics()
-    
+
     def add_knowledge(self, question, answer):
         """
         添加新的知识到知识库
@@ -156,5 +156,5 @@ class SimpleDataPlatformQAModel:
         # 重新计算向量表示
         embedding = self._get_text_embedding(question)
         self.question_embeddings[question] = embedding
-        
+
         return f"已成功添加新知识：{question}"
