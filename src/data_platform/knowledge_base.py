@@ -33,20 +33,64 @@ class DataPlatformKnowledgeBase:
             "数据备份": "数据备份策略包括定期备份、增量备份、异地备份等，确保数据的安全性和可恢复性"
         }
     
+    def _get_intent_map(self):
+        """
+        业务意图到知识库键的映射（用于中文语义近似的简易触发词）
+        """
+        return {
+            "数据入库": "数据入库流程",
+            "入库": "数据入库流程",
+            "连接配置": "数据库连接配置",
+            "数据库连接": "数据库连接配置",
+            "数据清洗": "数据清洗流程",
+            "清洗规则": "数据清洗规则",
+            "质量检查": "数据质量检查",
+            "数据质量": "数据质量检查",
+            "预处理": "数据预处理",
+            "数据转换": "数据转换",
+            "转换": "数据转换",
+            "标准化": "数据标准化",
+            "监控": "数据监控",
+            "任务调度": "任务调度",
+            "调度": "任务调度",
+            "异常处理": "异常处理",
+            "异常": "异常处理",
+            "数据安全": "数据安全",
+            "安全": "数据安全",
+            "权限管理": "权限管理",
+            "权限": "权限管理",
+            "数据备份": "数据备份",
+            "备份": "数据备份"
+        }
+
     def get_answer(self, question):
         """
         根据问题获取答案
         """
-        # 简单的关键词匹配
+        q = (question or "").strip()
+
+        # 1) 直接匹配（严格）
         for key, value in self.qa_knowledge.items():
-            if key in question:
+            if key in q:
                 return value
-        
-        # 如果没有直接匹配，尝试模糊匹配
+
+        # 2) 业务意图触发词（宽松）
+        intent_map = self._get_intent_map()
+        for intent, kb_key in intent_map.items():
+            if intent in q and kb_key in self.qa_knowledge:
+                return self.qa_knowledge[kb_key]
+
+        # 3) 简易模糊：按常见后缀裁剪（如 流程/策略/规则/配置 等），判断是否包含“根词”
+        common_suffixes = ("流程", "策略", "规则", "配置", "预处理", "转换", "标准化", "监控", "调度", "处理", "安全", "管理", "备份")
         for key, value in self.qa_knowledge.items():
-            if any(word in question for word in key.split()):
+            root = key
+            for suf in common_suffixes:
+                root = root.replace(suf, "")
+            root = root.strip()
+            if root and root in q:
                 return value
-        
+
+        # 4) 兜底拒答
         return "抱歉，我无法回答这个问题。请尝试询问关于数据清洗、数据入库、数据处理、数据监控或数据安全相关的问题。"
     
     def get_all_topics(self):
