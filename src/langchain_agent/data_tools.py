@@ -38,9 +38,9 @@ class DataServiceInput(BaseModel):
 
 class DataQueryTool(BaseTool):
     """数据查询工具"""
-    name = "data_query"
-    description = "查询指定数据的基本信息，包括数据结构、数据量、样本数据等"
-    args_schema = DataQueryInput
+    name: str = "data_query"
+    description: str = "查询指定数据的基本信息，包括数据结构、数据量、样本数据等"
+    args_schema: type = DataQueryInput
 
     def _run(self, data_name: str, query_type: str = "schema") -> str:
         """执行数据查询"""
@@ -95,9 +95,9 @@ class DataQueryTool(BaseTool):
 
 class DataCollectionTool(BaseTool):
     """数据采集工具"""
-    name = "data_collection"
-    description = "从指定数据源采集数据，支持数据库、API、文件等多种数据源"
-    args_schema = DataCollectionInput
+    name: str = "data_collection"
+    description: str = "从指定数据源采集数据，支持数据库、API、文件等多种数据源"
+    args_schema: type = DataCollectionInput
 
     def _run(self, data_name: str, source_type: str = "database", collection_config: Dict[str, Any] = None) -> str:
         """执行数据采集"""
@@ -139,9 +139,9 @@ class DataCollectionTool(BaseTool):
 
 class DataStorageTool(BaseTool):
     """数据入库工具"""
-    name = "data_storage"
-    description = "将采集的数据存储到数据仓库中，支持多种存储格式和配置"
-    args_schema = DataStorageInput
+    name: str = "data_storage"
+    description: str = "将采集的数据存储到数据仓库中，支持多种存储格式和配置"
+    args_schema: type = DataStorageInput
 
     def _run(self, data_name: str, data_content: str, storage_config: Dict[str, Any] = None) -> str:
         """执行数据入库"""
@@ -189,9 +189,9 @@ class DataStorageTool(BaseTool):
 
 class DataServiceTool(BaseTool):
     """数据服务发布工具"""
-    name = "data_service"
-    description = "将数据封装为API服务对外提供，支持REST API、GraphQL等多种服务类型"
-    args_schema = DataServiceInput
+    name: str = "data_service"
+    description: str = "将数据封装为API服务对外提供，支持REST API、GraphQL等多种服务类型"
+    args_schema: type = DataServiceInput
 
     def _run(self, data_name: str, service_type: str = "rest_api", service_config: Dict[str, Any] = None) -> str:
         """执行数据服务发布"""

@@ -286,8 +286,8 @@ def main():
     print("=" * 60)
 
     # 检查模型路径
-    classifier_path = "src/train/trained_classifiers/question_classifier"
-    qa_model_path = "src/train/trained_models/final_model"
+    classifier_path = r"E:\project\python\slm_model_train\src\train\trained_classifiers\question_classifier"
+    qa_model_path = r"E:\project\python\slm_model_train\src\train\trained_models\final_model"
 
     if not os.path.exists(classifier_path):
         classifier_path = None
