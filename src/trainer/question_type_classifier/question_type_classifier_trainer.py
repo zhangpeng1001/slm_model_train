@@ -370,9 +370,19 @@ class QuestionTypeClassifierTrainer:
         label_map_path = os.path.join(model_path, 'label_map.json')
         if os.path.exists(label_map_path):
             with open(label_map_path, 'r', encoding='utf-8') as f:
-                self.label_map = json.load(f)
+                loaded_label_map = json.load(f)
+                # 确保键是整数类型
+                self.label_map = {int(k): v for k, v in loaded_label_map.items()}
+        else:
+            # 如果没有找到label_map.json，使用默认映射
+            logger.warning("未找到label_map.json，使用默认标签映射")
+            self.label_map = {
+                0: "问题回答",
+                1: "任务处理"
+            }
 
         logger.info("模型加载完成！")
+        logger.info(f"标签映射: {self.label_map}")
 
 
 def main():

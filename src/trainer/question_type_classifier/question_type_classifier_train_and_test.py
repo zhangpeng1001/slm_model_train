@@ -86,8 +86,7 @@ def test_question_type_classifier(model_path=None):
         logger.info("测试完成！")
 
     except Exception as e:
-        # logger.error(f"测试过程中出现错误: {str(e)}")
-        logger.error(f"测试过程中出现错误: {str(e)}", e)
+        logger.error(f"测试过程中出现错误: {str(e)}")
 
 
 def interactive_test():
@@ -146,6 +145,5 @@ def interactive_test():
 if __name__ == "__main__":
     # 测试模式
     test_question_type_classifier()
-
     # 交互式测试模式
-    # interactive_test()
+    interactive_test()
