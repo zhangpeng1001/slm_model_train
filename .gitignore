@@ -67,5 +67,6 @@ src/secret.py
 src/transformers_one/model
 src/train/trained_models
 src/train/trained_classifiers
+src/train/trained_data_extractors
 src/dataset/datasets
 src/dataset/data
