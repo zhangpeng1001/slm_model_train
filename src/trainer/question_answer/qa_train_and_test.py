@@ -6,7 +6,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from src.train.qa_trainer import QATrainer
+from src.trainer.question_answer.qa_trainer import QATrainer
 from src.data_platform.enhanced_qa_model import EnhancedDataPlatformQAModel
 
 
@@ -170,7 +170,7 @@ def main():
         # 测试训练后的模型
         model_path = input("请输入训练后的模型路径 (默认: ./trained_models/final_model): ").strip()
         if not model_path:
-            model_path = './trained_models/final_model'
+            model_path = '../../train_data/trained_question_answer/final_model'
         test_model(model_path)
 
     elif choice == '4':
@@ -181,7 +181,7 @@ def main():
         # 交互式测试训练后的模型
         model_path = input("请输入训练后的模型路径 (默认: ./trained_models/final_model): ").strip()
         if not model_path:
-            model_path = './trained_models/final_model'
+            model_path = '../../train_data/trained_question_answer/final_model'
         interactive_test(model_path)
 
     else:

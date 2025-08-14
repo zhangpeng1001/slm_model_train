@@ -7,7 +7,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from src.train.question_classifier_trainer import QuestionClassifierTrainer
+from src.trainer.question_classifier.question_classifier_trainer import QuestionClassifierTrainer
 from src.controller.question_classifier import QuestionClassifier
 from src.controller.intelligent_qa_system import IntelligentQASystem
 
@@ -54,7 +54,7 @@ def test_classifier():
     print("=" * 60)
 
     # 检查是否有训练好的分类器
-    classifier_path = "./trained_classifiers/question_classifier"
+    classifier_path = "../../train_data/trained_question_classifier/question_classifier"
 
     if not os.path.exists(classifier_path):
         print("未找到训练好的分类器，请先训练分类器")
@@ -111,8 +111,8 @@ def test_intelligent_system():
     print("=" * 60)
 
     # 检查模型路径
-    classifier_path = "./trained_classifiers/question_classifier"
-    qa_model_path = "./trained_models/final_model"
+    classifier_path = "../../train_data/trained_question_classifier/question_classifier"
+    qa_model_path = "../../train_data/trained_question_answer/final_model"
 
     if not os.path.exists(classifier_path):
         classifier_path = None
@@ -157,7 +157,7 @@ def interactive_classifier_test():
     print("交互式分类器测试")
     print("=" * 60)
 
-    classifier_path = "./trained_classifiers/question_classifier"
+    classifier_path = "../../train_data/trained_question_classifier/question_classifier"
 
     if not os.path.exists(classifier_path):
         print("未找到训练好的分类器，请先训练分类器")
@@ -224,8 +224,8 @@ def main():
                 interactive_classifier_test()
             elif choice == "5":
                 # 启动智能问答系统
-                classifier_path = "./trained_classifiers/question_classifier"
-                qa_model_path = "./trained_models/final_model"
+                classifier_path = "../../train_data/trained_question_classifier/question_classifier"
+                qa_model_path = "../../train_data/trained_question_answer/final_model"
 
                 if not os.path.exists(classifier_path):
                     classifier_path = None

@@ -92,7 +92,7 @@ def interactive_test():
     trainer = DataExtractionTrainer(bert_model_path)
 
     # 尝试加载训练好的模型
-    trained_model_path = r"E:\project\python\slm_model_train\src\train\trained_data_extractors\final_data_extractor"
+    trained_model_path = r"/src/train/trained_data_extractors/final_data_extractor"
     if os.path.exists(trained_model_path):
         trainer.load_model(trained_model_path)
         logger.info("已加载训练好的模型")
