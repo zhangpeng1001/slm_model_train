@@ -28,17 +28,22 @@ class CustomDataPlatformLLM(LLM):
     """
     自定义LLM，集成我们训练的模型
     """
-
+    
+    classifier: Any = None
+    qa_model: Any = None
+    temperature: float = 0.1
+    max_tokens: int = 512
+    
     def __init__(self, classifier_path=None, qa_model_path=None):
         super().__init__()
-
+        
         # 初始化我们的训练模型
-        self.classifier = QuestionClassifier(classifier_path)
-        self.qa_model = EnhancedDataPlatformQAModel(trained_model_path=qa_model_path)
-
+        object.__setattr__(self, 'classifier', QuestionClassifier(classifier_path))
+        object.__setattr__(self, 'qa_model', EnhancedDataPlatformQAModel(trained_model_path=qa_model_path))
+        
         # 模型配置
-        self.temperature = 0.1
-        self.max_tokens = 512
+        object.__setattr__(self, 'temperature', 0.1)
+        object.__setattr__(self, 'max_tokens', 512)
 
     @property
     def _llm_type(self) -> str:
@@ -77,13 +82,13 @@ class CustomDataPlatformLLM(LLM):
         """处理工具调用相关的prompt"""
         # 分析prompt中的工具调用需求
         if "数据查询" in prompt or "查询" in prompt:
-            return "Action: data_query\nAction Input: {\"data_name\": \"用户指定的数据\", \"query_type\": \"schema\"}"
+            return "Action: data_query\nAction Input: 用户指定的数据|schema"
         elif "数据采集" in prompt or "采集" in prompt:
-            return "Action: data_collection\nAction Input: {\"data_name\": \"用户指定的数据\", \"source_type\": \"database\"}"
+            return "Action: data_collection\nAction Input: 用户指定的数据|database"
         elif "数据入库" in prompt or "入库" in prompt:
-            return "Action: data_storage\nAction Input: {\"data_name\": \"用户指定的数据\", \"data_content\": \"采集的数据\"}"
+            return "Action: data_storage\nAction Input: 用户指定的数据|采集的数据"
         elif "发服务" in prompt or "服务" in prompt:
-            return "Action: data_service\nAction Input: {\"data_name\": \"用户指定的数据\", \"service_type\": \"rest_api\"}"
+            return "Action: data_service\nAction Input: 用户指定的数据|rest_api"
         else:
             return qa_result["answer"]
 

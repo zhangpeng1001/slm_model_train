@@ -39,10 +39,15 @@ class DataServiceInput(BaseModel):
 class DataQueryTool(BaseTool):
     """数据查询工具"""
     name: str = "data_query"
-    description: str = "查询指定数据的基本信息，包括数据结构、数据量、样本数据等"
-    args_schema: type = DataQueryInput
-
-    def _run(self, data_name: str, query_type: str = "schema") -> str:
+    description: str = "查询指定数据的基本信息，包括数据结构、数据量、样本数据等。输入格式：'数据名称|查询类型'，查询类型可选：schema/count/sample，默认为schema"
+    
+    def _run(self, query_input: str) -> str:
+        """执行数据查询"""
+        # 解析输入参数
+        parts = query_input.split('|')
+        data_name = parts[0].strip()
+        query_type = parts[1].strip() if len(parts) > 1 else "schema"
+        
         """执行数据查询"""
         try:
             logger.info(f"开始查询数据: {data_name}, 查询类型: {query_type}")
@@ -89,17 +94,23 @@ class DataQueryTool(BaseTool):
             logger.error(error_msg)
             return json.dumps({"error": error_msg}, ensure_ascii=False)
 
-    async def _arun(self, data_name: str, query_type: str = "schema") -> str:
+    async def _arun(self, query_input: str) -> str:
         """异步执行数据查询"""
-        return self._run(data_name, query_type)
+        return self._run(query_input)
 
 class DataCollectionTool(BaseTool):
     """数据采集工具"""
     name: str = "data_collection"
-    description: str = "从指定数据源采集数据，支持数据库、API、文件等多种数据源"
-    args_schema: type = DataCollectionInput
-
-    def _run(self, data_name: str, source_type: str = "database", collection_config: Dict[str, Any] = None) -> str:
+    description: str = "从指定数据源采集数据，支持数据库、API、文件等多种数据源。输入格式：'数据名称|数据源类型'，数据源类型可选：database/api/file，默认为database"
+    
+    def _run(self, collection_input: str) -> str:
+        """执行数据采集"""
+        # 解析输入参数
+        parts = collection_input.split('|')
+        data_name = parts[0].strip()
+        source_type = parts[1].strip() if len(parts) > 1 else "database"
+        collection_config = {}
+        
         """执行数据采集"""
         try:
             if collection_config is None:
@@ -133,17 +144,23 @@ class DataCollectionTool(BaseTool):
             logger.error(error_msg)
             return json.dumps({"error": error_msg}, ensure_ascii=False)
 
-    async def _arun(self, data_name: str, source_type: str = "database", collection_config: Dict[str, Any] = None) -> str:
+    async def _arun(self, collection_input: str) -> str:
         """异步执行数据采集"""
-        return self._run(data_name, source_type, collection_config)
+        return self._run(collection_input)
 
 class DataStorageTool(BaseTool):
     """数据入库工具"""
     name: str = "data_storage"
-    description: str = "将采集的数据存储到数据仓库中，支持多种存储格式和配置"
-    args_schema: type = DataStorageInput
-
-    def _run(self, data_name: str, data_content: str, storage_config: Dict[str, Any] = None) -> str:
+    description: str = "将采集的数据存储到数据仓库中，支持多种存储格式和配置。输入格式：'数据名称|数据内容或路径'"
+    
+    def _run(self, storage_input: str) -> str:
+        """执行数据入库"""
+        # 解析输入参数
+        parts = storage_input.split('|', 1)
+        data_name = parts[0].strip()
+        data_content = parts[1].strip() if len(parts) > 1 else f"采集的{data_name}数据"
+        storage_config = {}
+        
         """执行数据入库"""
         try:
             if storage_config is None:
@@ -183,17 +200,23 @@ class DataStorageTool(BaseTool):
             logger.error(error_msg)
             return json.dumps({"error": error_msg}, ensure_ascii=False)
 
-    async def _arun(self, data_name: str, data_content: str, storage_config: Dict[str, Any] = None) -> str:
+    async def _arun(self, storage_input: str) -> str:
         """异步执行数据入库"""
-        return self._run(data_name, data_content, storage_config)
+        return self._run(storage_input)
 
 class DataServiceTool(BaseTool):
     """数据服务发布工具"""
     name: str = "data_service"
-    description: str = "将数据封装为API服务对外提供，支持REST API、GraphQL等多种服务类型"
-    args_schema: type = DataServiceInput
-
-    def _run(self, data_name: str, service_type: str = "rest_api", service_config: Dict[str, Any] = None) -> str:
+    description: str = "将数据封装为API服务对外提供，支持REST API、GraphQL等多种服务类型。输入格式：'数据名称|服务类型'，服务类型可选：rest_api/graphql/websocket，默认为rest_api"
+    
+    def _run(self, service_input: str) -> str:
+        """执行数据服务发布"""
+        # 解析输入参数
+        parts = service_input.split('|')
+        data_name = parts[0].strip()
+        service_type = parts[1].strip() if len(parts) > 1 else "rest_api"
+        service_config = {}
+        
         """执行数据服务发布"""
         try:
             if service_config is None:
@@ -240,9 +263,9 @@ class DataServiceTool(BaseTool):
             logger.error(error_msg)
             return json.dumps({"error": error_msg}, ensure_ascii=False)
 
-    async def _arun(self, data_name: str, service_type: str = "rest_api", service_config: Dict[str, Any] = None) -> str:
+    async def _arun(self, service_input: str) -> str:
         """异步执行数据服务发布"""
-        return self._run(data_name, service_type, service_config)
+        return self._run(service_input)
 
 # 工具列表
 DATA_TOOLS = [
