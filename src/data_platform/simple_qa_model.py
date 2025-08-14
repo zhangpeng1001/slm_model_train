@@ -20,7 +20,7 @@ class SimpleDataPlatformQAModel:
 
         # 模型路径
         if model_path is None:
-            self.model_path = r"E:\project\python\slm_model_train\src\transformers_one\model\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
+            self.model_path = r"E:\project\python\slm_model_train\src\model_data\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
         else:
             self.model_path = model_path
 

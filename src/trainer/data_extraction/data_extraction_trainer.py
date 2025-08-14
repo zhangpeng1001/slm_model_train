@@ -573,7 +573,7 @@ class DataExtractionTrainer:
 def main():
     """主训练函数"""
     # 模型路径
-    model_path = r"E:\project\python\slm_model_train\src\transformers_one\model\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
+    model_path = r"E:\project\python\slm_model_train\src\model_data\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
 
     # 创建训练器
     trainer = DataExtractionTrainer(model_path)

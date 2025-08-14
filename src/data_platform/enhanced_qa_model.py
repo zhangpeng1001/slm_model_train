@@ -97,7 +97,7 @@ class EnhancedDataPlatformQAModel:
 
         # 设置模型路径
         if base_model_path is None:
-            self.base_model_path = r"E:\project\python\slm_model_train\src\transformers_one\model\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
+            self.base_model_path = r"E:\project\python\slm_model_train\src\model_data\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
         else:
             self.base_model_path = base_model_path
 
