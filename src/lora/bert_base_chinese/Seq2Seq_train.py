@@ -2,10 +2,12 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSe
     Seq2SeqTrainer
 from peft import get_peft_model, LoraConfig, TaskType
 
+bert_model_path = r"E:\project\llm\model-data\base-models\models--bert-base-chinese\snapshots\8f23c25b06e129b6c986331a13d8d025a92cf0ea"
+save_path = r"E:\project\llm\lora\bert_base_chinese_seq2seq"
+
 # 加载模型和分词器
-model_name = "bert-base-chinese"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(bert_model_path)
+model = AutoModelForSeq2SeqLM.from_pretrained(bert_model_path)
 
 # 配置LoRA
 peft_config = LoraConfig(
@@ -38,7 +40,7 @@ tokenized_dataset = dataset.map(preprocess_function, batched=True)
 
 # 训练参数
 training_args = Seq2SeqTrainingArguments(
-    output_dir="./results",
+    output_dir=save_path,
     evaluation_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=8,
@@ -47,7 +49,7 @@ training_args = Seq2SeqTrainingArguments(
     save_total_limit=2,
     num_train_epochs=3,
     predict_with_generate=True,
-    logging_dir="./logs",
+    logging_dir=os.path.join(save_path, 'logs'),
     load_best_model_at_end=True,
 )
 
@@ -60,8 +62,6 @@ trainer = Seq2SeqTrainer(
     data_collator=DataCollatorForSeq2Seq(tokenizer, model=model),
 )
 
-# 开始训练
-trainer.train()
 
 
 # 推理代码
@@ -80,8 +80,11 @@ def generate_response(instruction, input_text):
 
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
+if __name__ == '__main__':
+    # 开始训练
+    trainer.train()
 
-# 示例调用
-print(generate_response("问题场景分类", "数据清洗流程是什么？"))  # 输出: 数据平台相关问题
-print(generate_response("问题回答", "数据清洗流程"))  # 输出: 数据清洗流程需要先配置清洗规则...
-print(generate_response("文件名称提取", "请帮我把实景三维模型成果数据进行治理"))  # 输出: 实景三维模型成果
+    # 示例调用
+    # print(generate_response("问题场景分类", "数据清洗流程是什么？"))  # 输出: 数据平台相关问题
+    # print(generate_response("问题回答", "数据清洗流程"))  # 输出: 数据清洗流程需要先配置清洗规则...
+    # print(generate_response("文件名称提取", "请帮我把实景三维模型成果数据进行治理"))  # 输出: 实景三维模型成果
