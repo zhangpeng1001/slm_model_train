@@ -24,6 +24,7 @@ from peft import (
 import logging
 from tqdm import tqdm
 from dataset import question_classifier, question_type_classifier, question_answer, file_name_pick
+import torch.nn as nn
 
 # 设置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,6 +40,111 @@ def set_seed(seed=42):
         torch.cuda.manual_seed_all(seed)
 
 set_seed(42)
+
+
+class BertForInstructionTuning(nn.Module):
+    """自定义BERT模型，支持指令微调"""
+    
+    def __init__(self, bert_model):
+        super().__init__()
+        self.bert = bert_model
+        self.config = bert_model.config
+        # 添加语言建模头
+        self.lm_head = nn.Linear(self.config.hidden_size, self.config.vocab_size, bias=False)
+        
+    def forward(self, input_ids, attention_mask=None, labels=None, **kwargs):
+        # 过滤掉BERT不支持的参数
+        bert_kwargs = {}
+        for key, value in kwargs.items():
+            if key not in ['num_items_in_batch']:  # 过滤掉训练器传递的额外参数
+                bert_kwargs[key] = value
+        
+        # 获取BERT输出
+        outputs = self.bert(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            **bert_kwargs
+        )
+        
+        # 计算logits
+        hidden_states = outputs.last_hidden_state
+        logits = self.lm_head(hidden_states)
+        
+        # 如果有labels，计算损失（用于训练）
+        if labels is not None:
+            # 计算损失
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = labels[..., 1:].contiguous()
+            
+            loss_fct = nn.CrossEntropyLoss()
+            loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+            
+            # 创建一个可以被索引的输出对象
+            class ModelOutput:
+                def __init__(self, loss, logits, last_hidden_state):
+                    self.loss = loss
+                    self.logits = logits
+                    self.last_hidden_state = last_hidden_state
+                
+                def __getitem__(self, key):
+                    if key == 0:
+                        return self.loss
+                    elif key == 1:
+                        return self.logits
+                    else:
+                        raise IndexError(f"Index {key} out of range")
+                
+                def __contains__(self, key):
+                    return key in ['loss', 'logits', 'last_hidden_state']
+                
+                def __getattr__(self, name):
+                    if name == 'loss':
+                        return self.loss
+                    elif name == 'logits':
+                        return self.logits
+                    elif name == 'last_hidden_state':
+                        return self.last_hidden_state
+                    else:
+                        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+            
+            return ModelOutput(loss, logits, hidden_states)
+        
+        # 创建一个可以被索引的输出对象（无损失）
+        class ModelOutput:
+            def __init__(self, logits, last_hidden_state):
+                self.logits = logits
+                self.last_hidden_state = last_hidden_state
+            
+            def __getitem__(self, key):
+                if key == 0:
+                    return self.logits
+                else:
+                    raise IndexError(f"Index {key} out of range")
+            
+            def __contains__(self, key):
+                return key in ['logits', 'last_hidden_state']
+        
+        return ModelOutput(logits, hidden_states)
+    
+    def prepare_inputs_for_generation(self, input_ids, **kwargs):
+        """为生成准备输入，PEFT需要这个方法"""
+        return {"input_ids": input_ids}
+    
+    def get_input_embeddings(self):
+        """获取输入嵌入层"""
+        return self.bert.embeddings.word_embeddings
+    
+    def set_input_embeddings(self, value):
+        """设置输入嵌入层"""
+        self.bert.embeddings.word_embeddings = value
+    
+    def get_output_embeddings(self):
+        """获取输出嵌入层"""
+        return self.lm_head
+    
+    def set_output_embeddings(self, new_embeddings):
+        """设置输出嵌入层"""
+        self.lm_head = new_embeddings
 
 
 class InstructionDataset(Dataset):
@@ -113,18 +219,22 @@ def train_model():
     tokenizer = BertTokenizer.from_pretrained(bert_model_path)
     # 添加特殊token以支持指令微调
     if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
+        tokenizer.pad_token = tokenizer.unk_token
     
-    model = BertModel.from_pretrained(bert_model_path)
+    # 加载基础BERT模型
+    bert_model = BertModel.from_pretrained(bert_model_path)
     
-    # 配置LoRA
+    # 使用自定义包装器
+    model = BertForInstructionTuning(bert_model)
+    
+    # 配置LoRA - 使用简化的目标模块名称
     lora_config = LoraConfig(
         r=16,                    # LoRA秩
         lora_alpha=32,           # LoRA缩放因子
         target_modules=["query", "key", "value", "dense"],  # 目标模块
         lora_dropout=0.1,        # LoRA dropout
         bias="none",             # 偏置设置
-        task_type=TaskType.FEATURE_EXTRACTION,  # 特征提取任务
+        task_type=TaskType.CAUSAL_LM,  # 因果语言建模任务
     )
     
     # 应用LoRA
