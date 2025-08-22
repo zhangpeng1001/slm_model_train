@@ -1,0 +1,102 @@
+[
+  {
+    "instruction": "你是一个工具调用助手。当用户需要查询信息时，请调用合适的工具。",
+    "input": "查询北京1号气温",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。可以同时调用多个工具解决复杂请求。",
+    "input": "获取北京天气和日元汇率0",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\"}}</tool_call>\n<tool_call>{\"name\": \"get_currency_rate\", \"arguments\": {\"from\": \"CNY\", \"to\": \"JPY\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。需要分步骤解决复杂请求时，请先思考再逐步调用工具。",
+    "input": "预订10号上海飞广州的机票和天气",
+    "output": "<thinking>1. 需先查询航班（工具：flight_search）\n2. 根据航班日期查询天气（工具：get_weather）\n3. 生成提醒消息（工具：send_reminder）</thinking>\n<tool_call>{\"name\": \"flight_search\", \"arguments\": {\"departure\": \"Shanghai\", \"arrival\": \"Beijing\", \"date\": \"next Monday\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当工具调用失败时，请修正参数重新调用。",
+    "input": "查询杭州天气（第0次修正）",
+    "output": "<thinking>上次调用get_weather失败，缺少日期参数</thinking>\n<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Shenzhen\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当用户需要查询信息时，请调用合适的工具。",
+    "input": "查询北京2号气温",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。可以同时调用多个工具解决复杂请求。",
+    "input": "获取北京天气和日元汇率1",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\"}}</tool_call>\n<tool_call>{\"name\": \"get_currency_rate\", \"arguments\": {\"from\": \"CNY\", \"to\": \"JPY\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。需要分步骤解决复杂请求时，请先思考再逐步调用工具。",
+    "input": "预订11号上海飞广州的机票和天气",
+    "output": "<thinking>1. 需先查询航班（工具：flight_search）\n2. 根据航班日期查询天气（工具：get_weather）\n3. 生成提醒消息（工具：send_reminder）</thinking>\n<tool_call>{\"name\": \"flight_search\", \"arguments\": {\"departure\": \"Shanghai\", \"arrival\": \"Beijing\", \"date\": \"next Monday\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当工具调用失败时，请修正参数重新调用。",
+    "input": "查询杭州天气（第1次修正）",
+    "output": "<thinking>上次调用get_weather失败，缺少日期参数</thinking>\n<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Shenzhen\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当用户需要查询信息时，请调用合适的工具。",
+    "input": "查询北京3号气温",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。可以同时调用多个工具解决复杂请求。",
+    "input": "获取北京天气和日元汇率2",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\"}}</tool_call>\n<tool_call>{\"name\": \"get_currency_rate\", \"arguments\": {\"from\": \"CNY\", \"to\": \"JPY\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。需要分步骤解决复杂请求时，请先思考再逐步调用工具。",
+    "input": "预订12号上海飞广州的机票和天气",
+    "output": "<thinking>1. 需先查询航班（工具：flight_search）\n2. 根据航班日期查询天气（工具：get_weather）\n3. 生成提醒消息（工具：send_reminder）</thinking>\n<tool_call>{\"name\": \"flight_search\", \"arguments\": {\"departure\": \"Shanghai\", \"arrival\": \"Beijing\", \"date\": \"next Monday\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当工具调用失败时，请修正参数重新调用。",
+    "input": "查询杭州天气（第2次修正）",
+    "output": "<thinking>上次调用get_weather失败，缺少日期参数</thinking>\n<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Shenzhen\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当用户需要查询信息时，请调用合适的工具。",
+    "input": "查询北京4号气温",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。可以同时调用多个工具解决复杂请求。",
+    "input": "获取北京天气和日元汇率3",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\"}}</tool_call>\n<tool_call>{\"name\": \"get_currency_rate\", \"arguments\": {\"from\": \"CNY\", \"to\": \"JPY\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。需要分步骤解决复杂请求时，请先思考再逐步调用工具。",
+    "input": "预订13号上海飞广州的机票和天气",
+    "output": "<thinking>1. 需先查询航班（工具：flight_search）\n2. 根据航班日期查询天气（工具：get_weather）\n3. 生成提醒消息（工具：send_reminder）</thinking>\n<tool_call>{\"name\": \"flight_search\", \"arguments\": {\"departure\": \"Shanghai\", \"arrival\": \"Beijing\", \"date\": \"next Monday\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当工具调用失败时，请修正参数重新调用。",
+    "input": "查询杭州天气（第3次修正）",
+    "output": "<thinking>上次调用get_weather失败，缺少日期参数</thinking>\n<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Shenzhen\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当用户需要查询信息时，请调用合适的工具。",
+    "input": "查询北京5号气温",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\", \"date\": \"today\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。可以同时调用多个工具解决复杂请求。",
+    "input": "获取北京天气和日元汇率4",
+    "output": "<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Beijing\"}}</tool_call>\n<tool_call>{\"name\": \"get_currency_rate\", \"arguments\": {\"from\": \"CNY\", \"to\": \"JPY\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。需要分步骤解决复杂请求时，请先思考再逐步调用工具。",
+    "input": "预订14号上海飞广州的机票和天气",
+    "output": "<thinking>1. 需先查询航班（工具：flight_search）\n2. 根据航班日期查询天气（工具：get_weather）\n3. 生成提醒消息（工具：send_reminder）</thinking>\n<tool_call>{\"name\": \"flight_search\", \"arguments\": {\"departure\": \"Shanghai\", \"arrival\": \"Beijing\", \"date\": \"next Monday\"}}</tool_call>"
+  },
+  {
+    "instruction": "你是一个工具调用助手。当工具调用失败时，请修正参数重新调用。",
+    "input": "查询杭州天气（第4次修正）",
+    "output": "<thinking>上次调用get_weather失败，缺少日期参数</thinking>\n<tool_call>{\"name\": \"get_weather\", \"arguments\": {\"location\": \"Shenzhen\", \"date\": \"today\"}}</tool_call>"
+  }
+]
