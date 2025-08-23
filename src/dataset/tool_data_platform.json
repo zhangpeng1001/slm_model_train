@@ -1,0 +1,158 @@
+
+[
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据采集相关需求时，请调用数据采集工具（get_data_collection），并传入数据源、数据类型、时间范围等必要参数。",
+"input": "帮我采集昨天电商平台的用户订单数据，数据源是 “京东自营订单表”",
+"output": "<tool_call>{\"name\":\"get_data_collection\",\"arguments\": {\"data_source\":\" 京东自营订单表 \",\"data_type\":\" 用户订单数据 \",\"time_range\":\" 昨天 \",\"business_platform\":\" 电商平台 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据采集相关需求时，请调用数据采集工具（get_data_collection），并传入数据源类型、存储地址等必要参数。",
+"input": "需要采集近 7 天的线下门店销售数据，数据源类型是 MySQL 数据库，存储地址在 192.168.1.100:3306",
+"output": "<tool_call>{\"name\":\"get_data_collection\",\"arguments\": {\"data_source_type\":\"MySQL 数据库 \",\"data_type\":\" 线下门店销售数据 \",\"time_range\":\" 近 7 天 \",\"db_address\":\"192.168.1.100:3306\"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据采集相关需求时，请调用数据采集工具（get_data_collection），并传入采集类型、数据源接口等必要参数。",
+"input": "触发实时采集任务，采集当前时刻的物流配送状态数据，数据源是 “顺丰 API 接口”",
+"output": "<tool_call>{\"name\":\"get_data_collection\",\"arguments\": {\"data_source\":\" 顺丰 API 接口 \",\"data_type\":\" 物流配送状态数据 \",\"collection_type\":\" 实时采集 \",\"time_range\":\" 当前时刻 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据采集相关需求时，请调用数据采集工具（get_data_collection），并传入必填字段、时间周期等必要参数。",
+"input": "采集 2024 年 Q2 的用户注册数据，数据源是企业微信表单，需要包含用户手机号和注册渠道字段",
+"output": "<tool_call>{\"name\":\"get_data_collection\",\"arguments\": {\"data_source\":\" 企业微信表单 \",\"data_type\":\" 用户注册数据 \",\"time_range\":\"2024 年 Q2\",\"required_fields\": [\" 用户手机号 \",\" 注册渠道 \"]}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据采集相关需求时，请调用数据采集工具（get_data_collection），并传入 HDFS 路径、采集频率等必要参数。",
+"input": "帮我从 HDFS 集群（路径 /hive/ods/user/）采集上月的用户行为日志，采集频率设为一次性",
+"output": "<tool_call>{\"name\":\"get_data_collection\",\"arguments\": {\"data_source_type\":\"HDFS 集群 \",\"data_source_path\":\"/hive/ods/user/\",\"data_type\":\" 用户行为日志 \",\"time_range\":\" 上月 \",\"collection_frequency\":\" 一次性 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出根据文件名称查询数据相关需求时，请调用按文件名查数据工具（query_data_by_filename），并传入完整文件名、查询内容等必要参数。",
+"input": "帮我查一下文件名是 “20240520_电商订单_北京.xlsx” 的数据，看看它存在哪个目录里",
+"output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename\":\"20240520_电商订单_北京.xlsx\",\"query_content\":\" 存储目录 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出根据文件名称查询数据相关需求时，请调用按文件名查数据工具（query_data_by_filename），并传入文件名关键词、文件格式等必要参数。",
+"input": "查询文件名包含 “用户画像_v2” 的所有 CSV 文件，需要知道它们的创建时间和数据大小",
+"output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_keyword\":\" 用户画像_v2\",\"file_format\":\"CSV\",\"query_content\": [\" 创建时间 \",\" 数据大小 \"]}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出根据文件名称查询数据相关需求时，请调用按文件名查数据工具（query_data_by_filename），并传入文件名前缀、数据源系统查询需求等必要参数。",
+"input": "我要找文件名以 “2024Q1_销售汇总_” 开头的 Parquet 文件，查一下这些文件对应的数据源是哪个系统",
+"output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_prefix\":\"2024Q1_销售汇总_\",\"file_format\":\"Parquet\",\"query_content\":\" 数据源系统 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出根据文件名称查询数据相关需求时，请调用按文件名查数据工具（query_data_by_filename），并传入具体文件名、关联信息查询需求等必要参数。",
+"input": "麻烦查一下文件名 “logistics_status_20240520_12.csv” 的数据，获取它的存储路径和关联的数据表",
+"output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename\":\"logistics_status_20240520_12.csv\",\"query_content\": [\" 存储路径 \",\" 关联数据表 \"]}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出根据文件名称查询数据相关需求时，请调用按文件名查数据工具（query_data_by_filename），并传入文件名后缀、数据所有者查询需求等必要参数。",
+"input": "查找所有文件名末尾是 “_test.txt” 的文件，看看它们的最近修改时间和数据所有者",
+"output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_suffix\":\"_test.txt\",\"file_format\":\"TXT\",\"query_content\": [\" 最近修改时间 \",\" 数据所有者 \"]}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据入库相关需求时，请调用数据入库工具（data_warehousing），并传入数据源路径、目标库表、入库策略等必要参数。",
+"input": "把 HDFS 路径 /hive/ods/order/20240520 / 下的订单数据全量入库到 Hive 的 dw_orders 库的 order_detail 表",
+"output": "<tool_call>{\"name\":\"data_warehousing\",\"arguments\": {\"source_data_path\":\"/hive/ods/order/20240520/\",\"target_db_type\":\"Hive\",\"target_db\":\"dw_orders\",\"target_table\":\"order_detail\",\"warehousing_strategy\":\" 全量入库 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据入库相关需求时，请调用数据入库工具（data_warehousing），并传入本地文件路径、去重字段等必要参数。",
+"input": "将本地文件 “C:/data/user_202405.csv” 的用户数据增量入库到 MySQL 的 user_db 库的 user_info 表，按 “user_id” 字段去重",
+"output": "<tool_call>{\"name\":\"data_warehousing\",\"arguments\": {\"source_data_path\":\"C:/data/user_202405.csv\",\"source_data_type\":\" 本地文件 \",\"target_db_type\":\"MySQL\",\"target_db\":\"user_db\",\"target_table\":\"user_info\",\"warehousing_strategy\":\" 增量入库 \",\"deduplication_field\":\"user_id\"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据入库相关需求时，请调用数据入库工具（data_warehousing），并传入 Kafka 主题、增量频率等必要参数。",
+"input": "把 Kafka 主题 “topic_sales_real_time” 的实时销售数据，按分钟增量入库到 ClickHouse 的 sales_db 库的 real_time_sales 表",
+"output": "<tool_call>{\"name\":\"data_warehousing\",\"arguments\": {\"source_data_type\":\"Kafka 主题 \",\"source_kafka_topic\":\"topic_sales_real_time\",\"target_db_type\":\"ClickHouse\",\"target_db\":\"sales_db\",\"target_table\":\"real_time_sales\",\"warehousing_strategy\":\" 增量入库 \",\"increment_frequency\":\" 按分钟 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据入库相关需求时，请调用数据入库工具（data_warehousing），并传入数据湖路径、入库后校验需求等必要参数。",
+"input": "将数据湖路径 /s3/datalake/logistics/202405 / 的物流数据，全量入库到 Hive 的 dw_logistics 库的 logistics_info 表，入库后校验数据行数",
+"output": "<tool_call>{\"name\":\"data_warehousing\",\"arguments\": {\"source_data_path\":\"/s3/datalake/logistics/202405/\",\"source_data_type\":\" 数据湖文件 \",\"target_db_type\":\"Hive\",\"target_db\":\"dw_logistics\",\"target_table\":\"logistics_info\",\"warehousing_strategy\":\" 全量入库 \",\"post_check\":\" 数据行数校验 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据入库相关需求时，请调用数据入库工具（data_warehousing），并传入源数据库地址、源表信息等必要参数。",
+"input": "帮我把 Oracle 数据库（地址 10.0.0.5:1521）中 scott 库的 emp 表数据，全量入库到 Hive 的 ods_hr 库的 emp_ods 表",
+"output": "<tool_call>{\"name\":\"data_warehousing\",\"arguments\": {\"source_db_type\":\"Oracle\",\"source_db_address\":\"10.0.0.5:1521\",\"source_db\":\"scott\",\"source_table\":\"emp\",\"target_db_type\":\"Hive\",\"target_db\":\"ods_hr\",\"target_table\":\"emp_ods\",\"warehousing_strategy\":\" 全量入库 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据发服务相关需求时，请调用数据发服务工具（data_service_publish），并传入源库表、数据筛选条件、授权范围等必要参数。",
+"input": "把 Hive dw_sales 库 sales_summary 表中 2024 年 5 月的北京地区销售数据，发布为 REST API 服务，授权给 “市场部” 使用",
+"output": "<tool_call>{\"name\":\"data_service_publish\",\"arguments\": {\"source_db_type\":\"Hive\",\"source_db\":\"dw_sales\",\"source_table\":\"sales_summary\",\"data_filter\": [\" 时间 = 2024 年 5 月 \",\" 地区 = 北京 \"],\"service_type\":\"REST API\",\"authorization\":\" 市场部 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据发服务相关需求时，请调用数据发服务工具（data_service_publish），并传入排除字段、服务有效期等必要参数。",
+"input": "将 MySQL user_db 库 user_portrait 表的用户画像数据（排除手机号字段），发布为文件下载服务，支持 CSV 格式，有效期 7 天",
+"output": "<tool_call>{\"name\":\"data_service_publish\",\"arguments\": {\"source_db_type\":\"MySQL\",\"source_db\":\"user_db\",\"source_table\":\"user_portrait\",\"exclude_fields\": [\" 手机号 \"],\"service_type\":\" 文件下载 \",\"file_format\":\"CSV\",\"service_validity\":\"7 天 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据发服务相关需求时，请调用数据发服务工具（data_service_publish），并传入实时数据源、推送频率等必要参数。",
+"input": "把 Kafka 主题 “topic_user_behavior” 的实时用户行为数据，发布为 WebSocket 服务，授权给 “推荐系统团队”，每秒推送一次",
+"output": "<tool_call>{\"name\":\"data_service_publish\",\"arguments\": {\"source_data_type\":\"Kafka 主题 \",\"source_kafka_topic\":\"topic_user_behavior\",\"data_type\":\" 实时用户行为数据 \",\"service_type\":\"WebSocket\",\"authorization\":\" 推荐系统团队 \",\"push_frequency\":\" 每秒一次 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据发服务相关需求时，请调用数据发服务工具（data_service_publish），并传入本地文件路径、访问控制规则等必要参数。",
+"input": "帮我把本地文件 “D:/report/2024Q1_财务汇总.xlsx” 的数据，发布为 HTTP 文件下载服务，仅允许内网 IP 访问",
+"output": "<tool_call>{\"name\":\"data_service_publish\",\"arguments\": {\"source_data_path\":\"D:/report/2024Q1_财务汇总.xlsx\",\"source_data_type\":\" 本地文件 \",\"service_type\":\"HTTP 文件下载 \",\"access_control\":\" 仅内网 IP\"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据发服务相关需求时，请调用数据发服务工具（data_service_publish），并传入 HDFS 路径、筛选支持字段等必要参数。",
+"input": "将 HDFS 路径 /hive/ods/product/202405 / 的商品数据，发布为 GraphQL 服务，支持按 “商品 ID”“品类” 筛选，授权给 “电商技术组”",
+"output": "<tool_call>{\"name\":\"data_service_publish\",\"arguments\": {\"source_data_path\":\"/hive/ods/product/202405/\",\"source_data_type\":\"HDFS 文件 \",\"data_type\":\" 商品数据 \",\"service_type\":\"GraphQL\",\"support_filters\": [\" 商品 ID\",\" 品类 \"],\"authorization\":\" 电商技术组 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据质检相关需求时，请调用数据质检工具（data_quality_check），并传入源库表、质检维度、阈值规则等必要参数。",
+"input": "对 Hive ods_order 库 order_20240520 表的数据做质检，检查 “订单金额” 字段是否有负数（阈值 > 0）、“订单 ID” 是否为空",
+"output": "<tool_call>{\"name\":\"data_quality_check\",\"arguments\": {\"source_db_type\":\"Hive\",\"source_db\":\"ods_order\",\"source_table\":\"order_20240520\",\"check_dimensions\": [\" 准确性（订单金额 > 0）\",\" 完整性（订单 ID 非空）\"]}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据质检相关需求时，请调用数据质检工具（data_quality_check），并传入本地文件路径、格式校验规则等必要参数。",
+"input": "质检本地文件 “user_data_202405.csv”，检查 “用户年龄” 字段是否在 18-65 之间、“手机号” 格式是否符合 11 位数字规则",
+"output": "<tool_call>{\"name\":\"data_quality_check\",\"arguments\": {\"source_data_path\":\"user_data_202405.csv\",\"source_data_type\":\" 本地 CSV 文件 \",\"check_dimensions\": [\" 准确性（用户年龄 18-65）\",\" 格式一致性（手机号 11 位数字）\"]}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据质检相关需求时，请调用数据质检工具（data_quality_check），并传入参考数据、一致性校验范围等必要参数。",
+"input": "校验 MySQL sales_db 库 sales_detail 表中 “地区” 字段的一致性，确保所有值属于 [\" 北京 \",\" 上海 \",\" 广州 \",\" 深圳 \"]，同时检查数据总行数是否与前一天偏差超过 10%",
+"output": "<tool_call>{\"name\":\"data_quality_check\",\"arguments\": {\"source_db_type\":\"MySQL\",\"source_db\":\"sales_db\",\"source_table\":\"sales_detail\",\"check_dimensions\": [\" 值一致性（地区在指定列表内）\",\" 总量稳定性（行数偏差≤10%）\"],\"reference_data\":\" 前一天数据 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据质检相关需求时，请调用数据质检工具（data_quality_check），并传入实时数据源、逻辑校验规则等必要参数。",
+"input": "对 Kafka 主题 “topic_logistics” 的实时物流数据做质检，检查 “配送时间” 是否晚于 “下单时间”、“物流单号” 是否唯一",
+"output": "<tool_call>{\"name\":\"data_quality_check\",\"arguments\": {\"source_data_type\":\"Kafka 主题 \",\"source_kafka_topic\":\"topic_logistics\",\"data_type\":\" 实时物流数据 \",\"check_dimensions\": [\" 逻辑一致性（配送时间 > 下单时间）\",\" 唯一性（物流单号无重复）\"]}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据质检相关需求时，请调用数据质检工具（data_quality_check），并传入 HDFS 路径、关联校验表等必要参数。",
+"input": "质检 HDFS 路径 /hive/ods/user/202405 / 的用户日志，检查 “访问时长” 字段是否为非负数、“用户 ID” 与 user_info 表的关联匹配率是否≥95%",
+"output": "<tool_call>{\"name\":\"data_quality_check\",\"arguments\": {\"source_data_path\":\"/hive/ods/user/202405/\",\"source_data_type\":\"HDFS 日志文件 \",\"check_dimensions\": [\" 准确性（访问时长≥0）\",\" 关联一致性（用户 ID 匹配率≥95%）\"],\"reference_table\":\"user_info 表 \"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据清洗相关需求时，请调用数据清洗工具（data_cleaning），并传入本地文件路径、清洗规则、目标存储路径等必要参数。",
+"input": "清洗本地文件 “order_data_202405.csv”：删除 “订单 ID” 重复的行，用 “0” 填充 “优惠金额” 为空的字段，清洗后存到 D:/cleaned_data/",
+"output": "<tool_call>{\"name\":\"data_cleaning\",\"arguments\": {\"source_data_path\":\"order_data_202405.csv\",\"source_data_type\":\" 本地 CSV 文件 \",\"clean_rules\": [\" 去重（订单 ID）\",\" 缺失值填充（优惠金额用 0 填充）\"],\"target_save_path\":\"D:/cleaned_data/\"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据清洗相关需求时，请调用数据清洗工具（data_cleaning），并传入源库表、异常值处理规则、目标库表等必要参数。",
+"input": "清洗 Hive ods_user 库 user_202405 表：将 “用户年龄”>100 或 < 0 的记录标记为异常并删除，把 “注册时间” 格式统一转为 “yyyy-MM-dd HH:mm:ss”，结果存到 dw_user 库 clean_user 表",
+"output": "<tool_call>{\"name\":\"data_cleaning\",\"arguments\": {\"source_db_type\":\"Hive\",\"source_db\":\"ods_user\",\"source_table\":\"user_202405\",\"clean_rules\": [\" 异常值删除（用户年龄 0-100）\",\" 格式统一（注册时间转为 yyyy-MM-dd HH:mm:ss）\"],\"target_db_type\":\"Hive\",\"target_db\":\"dw_user\",\"target_table\":\"clean_user\"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据清洗相关需求时，请调用数据清洗工具（data_cleaning），并传入源库表、去重保留规则、目标文件格式等必要参数。",
+"input": "清洗 MySQL sales_db 库 sales_raw 表：按 “交易 ID” 去重（保留最新一条），用 “地区” 字段的众数填充该字段的空值，清洗后导出为 Parquet 文件存到 HDFS 的 /hive/cleaned/sales/ 路径",
+"output": "<tool_call>{\"name\":\"data_cleaning\",\"arguments\": {\"source_db_type\":\"MySQL\",\"source_db\":\"sales_db\",\"source_table\":\"sales_raw\",\"clean_rules\": [\" 去重（交易 ID，保留最新）\",\" 缺失值填充（地区用众数）\"],\"target_data_type\":\"Parquet 文件 \",\"target_save_path\":\"/hive/cleaned/sales/\"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据清洗相关需求时，请调用数据清洗工具（data_cleaning），并传入实时数据源、过滤规则、目标主题等必要参数。",
+"input": "清洗 Kafka 主题 “topic_user_behavior” 的实时数据：过滤掉 “访问时长”<1 秒的记录，将 “设备类型” 字段的 “ios”“IOS” 统一改为 “iOS”，清洗后推送到新 Kafka 主题 “topic_user_behavior_clean”",
+"output": "<tool_call>{\"name\":\"data_cleaning\",\"arguments\": {\"source_data_type\":\"Kafka 主题 \",\"source_kafka_topic\":\"topic_user_behavior\",\"clean_rules\": [\" 过滤（访问时长≥1 秒）\",\" 值统一（设备类型 ios→iOS）\"],\"target_data_type\":\"Kafka 主题 \",\"target_kafka_topic\":\"topic_user_behavior_clean\"}}</tool_call>"
+},
+{
+"instruction": "你是数据中台项目的工具调用助手，当用户提出数据清洗相关需求时，请调用数据清洗工具（data_cleaning），并传入数据湖路径、值标准化规则等必要参数。",
+"input": "清洗数据湖路径 /s3/datalake/logistics/raw/ 的物流数据：删除 “物流单号” 为空的记录，将 “配送地址” 中的 “北京市”“北京” 统一改为 “北京”，清洗后存到 /s3/datalake/logistics/clean/ 路径",
+"output": "<tool_call>{\"name\":\"data_cleaning\",\"arguments\": {\"source_data_path\":\"/s3/datalake/logistics/raw/\",\"source_data_type\":\" 数据湖文件 \",\"clean_rules\": [\" 空值删除（物流单号非空）\",\" 值统一（配送地址北京标准化）\"],\"target_save_path\":\"/s3/datalake/logistics/clean/\"}}</tool_call>"
+},
+  {
+  "instruction": "你是一个工具调用助手。当用户需要采集设备数据时，请调用数据采集工具。",
+  "input": "将设备DHT11的温湿度数据推送到数据平台",
+  "output": "<tool_call>{\"name\": \"data_collection\", \"arguments\": {\"device_id\": \"DHT11\", \"sensor_type\": \"temperature_humidity\", \"platform_url\": \"https://api.data-platform.com/ingest\"}}</tool_call>"
+}
+]
