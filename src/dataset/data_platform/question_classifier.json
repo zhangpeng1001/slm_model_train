@@ -1,0 +1,438 @@
+[
+  {
+    "input": "数据清洗流程是什么？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "如何进行数据清洗？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据清洗步骤有哪些？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据清洗的流程",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "怎么清洗数据？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据入库流程",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "如何进行数据入库？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据入库的步骤",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "怎样入库数据？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据入库操作",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据质量检查",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "如何检查数据质量？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据质量检查方法",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据质量如何保证？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "质量检查步骤",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据监控",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "如何监控数据？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据监控方法",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据监控怎么做？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "监控数据流程",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据安全",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "如何保证数据安全？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据安全措施",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据安全怎么做？",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据加密方法",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据预处理",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据转换",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据标准化",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据备份",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "权限管理",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "任务调度",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "异常处理",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据库连接",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据处理流程",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "ETL流程",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据仓库",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据平台架构",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据治理",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "数据血缘",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "元数据管理",
+    "output": "数据平台相关"
+  },
+  {
+    "input": "你好",
+    "output": "通用对话"
+  },
+  {
+    "input": "您好",
+    "output": "通用对话"
+  },
+  {
+    "input": "hi",
+    "output": "通用对话"
+  },
+  {
+    "input": "hello",
+    "output": "通用对话"
+  },
+  {
+    "input": "早上好",
+    "output": "通用对话"
+  },
+  {
+    "input": "下午好",
+    "output": "通用对话"
+  },
+  {
+    "input": "晚上好",
+    "output": "通用对话"
+  },
+  {
+    "input": "谢谢",
+    "output": "通用对话"
+  },
+  {
+    "input": "谢谢你",
+    "output": "通用对话"
+  },
+  {
+    "input": "感谢",
+    "output": "通用对话"
+  },
+  {
+    "input": "不客气",
+    "output": "通用对话"
+  },
+  {
+    "input": "再见",
+    "output": "通用对话"
+  },
+  {
+    "input": "拜拜",
+    "output": "通用对话"
+  },
+  {
+    "input": "bye",
+    "output": "通用对话"
+  },
+  {
+    "input": "好的",
+    "output": "通用对话"
+  },
+  {
+    "input": "知道了",
+    "output": "通用对话"
+  },
+  {
+    "input": "明白了",
+    "output": "通用对话"
+  },
+  {
+    "input": "收到",
+    "output": "通用对话"
+  },
+  {
+    "input": "OK",
+    "output": "通用对话"
+  },
+  {
+    "input": "可以",
+    "output": "通用对话"
+  },
+  {
+    "input": "没问题",
+    "output": "通用对话"
+  },
+  {
+    "input": "帮忙",
+    "output": "通用对话"
+  },
+  {
+    "input": "请问",
+    "output": "通用对话"
+  },
+  {
+    "input": "能否",
+    "output": "通用对话"
+  },
+  {
+    "input": "麻烦",
+    "output": "通用对话"
+  },
+  {
+    "input": "打扰了",
+    "output": "通用对话"
+  },
+  {
+    "input": "不好意思",
+    "output": "通用对话"
+  },
+  {
+    "input": "对不起",
+    "output": "通用对话"
+  },
+  {
+    "input": "抱歉",
+    "output": "通用对话"
+  },
+  {
+    "input": "今天天气怎么样？",
+    "output": "无关问题"
+  },
+  {
+    "input": "北京有什么好吃的？",
+    "output": "无关问题"
+  },
+  {
+    "input": "如何学习英语？",
+    "output": "无关问题"
+  },
+  {
+    "input": "Python怎么安装？",
+    "output": "无关问题"
+  },
+  {
+    "input": "什么是机器学习？",
+    "output": "无关问题"
+  },
+  {
+    "input": "股票今天涨了吗？",
+    "output": "无关问题"
+  },
+  {
+    "input": "电影推荐一下",
+    "output": "无关问题"
+  },
+  {
+    "input": "音乐好听吗？",
+    "output": "无关问题"
+  },
+  {
+    "input": "游戏攻略",
+    "output": "无关问题"
+  },
+  {
+    "input": "旅游景点推荐",
+    "output": "无关问题"
+  },
+  {
+    "input": "美食制作方法",
+    "output": "无关问题"
+  },
+  {
+    "input": "健身计划",
+    "output": "无关问题"
+  },
+  {
+    "input": "减肥方法",
+    "output": "无关问题"
+  },
+  {
+    "input": "护肤品推荐",
+    "output": "无关问题"
+  },
+  {
+    "input": "汽车保养",
+    "output": "无关问题"
+  },
+  {
+    "input": "房价走势",
+    "output": "无关问题"
+  },
+  {
+    "input": "教育政策",
+    "output": "无关问题"
+  },
+  {
+    "input": "医疗保险",
+    "output": "无关问题"
+  },
+  {
+    "input": "法律咨询",
+    "output": "无关问题"
+  },
+  {
+    "input": "心理健康",
+    "output": "无关问题"
+  },
+  {
+    "input": "what is your name?",
+    "output": "无关问题"
+  },
+  {
+    "input": "how are you?",
+    "output": "无关问题"
+  },
+  {
+    "input": "where are you from?",
+    "output": "无关问题"
+  },
+  {
+    "input": "tell me a joke",
+    "output": "无关问题"
+  },
+  {
+    "input": "sing a song",
+    "output": "无关问题"
+  },
+  {
+    "input": "write a poem",
+    "output": "无关问题"
+  },
+  {
+    "input": "calculate 1+1",
+    "output": "无关问题"
+  },
+  {
+    "input": "what time is it?",
+    "output": "无关问题"
+  },
+  {
+    "input": "random text here",
+    "output": "无关问题"
+  },
+  {
+    "input": "asdfghjkl",
+    "output": "无关问题"
+  },
+  {
+    "input": "123456789",
+    "output": "无关问题"
+  },
+  {
+    "input": "测试文本",
+    "output": "无关问题"
+  },
+  {
+    "input": "随机输入",
+    "output": "无关问题"
+  },
+  {
+    "input": "无意义内容",
+    "output": "无关问题"
+  },
+  {
+    "input": "乱七八糟",
+    "output": "无关问题"
+  },
+  {
+    "input": "胡言乱语",
+    "output": "无关问题"
+  },
+  {
+    "input": "不知所云",
+    "output": "无关问题"
+  },
+  {
+    "input": "莫名其妙",
+    "output": "无关问题"
+  },
+  {
+    "input": "奇怪问题",
+    "output": "无关问题"
+  },
+  {
+    "input": "无关内容",
+    "output": "无关问题"
+  }
+]
