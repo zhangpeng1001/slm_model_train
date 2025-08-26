@@ -434,5 +434,189 @@
   {
     "input": "无关内容",
     "output": "无关问题"
+  },
+  {
+    "input": "请帮我",
+    "output": "通用对话"
+  },
+  {
+    "input": "能帮忙吗",
+    "output": "通用对话"
+  },
+  {
+    "input": "有什么可以帮助的",
+    "output": "通用对话"
+  },
+  {
+    "input": "我需要帮助",
+    "output": "通用对话"
+  },
+  {
+    "input": "请协助",
+    "output": "通用对话"
+  },
+  {
+    "input": "支持一下",
+    "output": "通用对话"
+  },
+  {
+    "input": "辛苦了",
+    "output": "通用对话"
+  },
+  {
+    "input": "很棒",
+    "output": "通用对话"
+  },
+  {
+    "input": "不错",
+    "output": "通用对话"
+  },
+  {
+    "input": "很好",
+    "output": "通用对话"
+  },
+  {
+    "input": "太好了",
+    "output": "通用对话"
+  },
+  {
+    "input": "完美",
+    "output": "通用对话"
+  },
+  {
+    "input": "优秀",
+    "output": "通用对话"
+  },
+  {
+    "input": "赞",
+    "output": "通用对话"
+  },
+  {
+    "input": "厉害",
+    "output": "通用对话"
+  },
+  {
+    "input": "牛",
+    "output": "通用对话"
+  },
+  {
+    "input": "加油",
+    "output": "通用对话"
+  },
+  {
+    "input": "继续",
+    "output": "通用对话"
+  },
+  {
+    "input": "等等",
+    "output": "通用对话"
+  },
+  {
+    "input": "稍等",
+    "output": "通用对话"
+  },
+  {
+    "input": "等一下",
+    "output": "通用对话"
+  },
+  {
+    "input": "请稍候",
+    "output": "通用对话"
+  },
+  {
+    "input": "马上",
+    "output": "通用对话"
+  },
+  {
+    "input": "立即",
+    "output": "通用对话"
+  },
+  {
+    "input": "现在",
+    "output": "通用对话"
+  },
+  {
+    "input": "开始",
+    "output": "通用对话"
+  },
+  {
+    "input": "结束",
+    "output": "通用对话"
+  },
+  {
+    "input": "完成",
+    "output": "通用对话"
+  },
+  {
+    "input": "搞定",
+    "output": "通用对话"
+  },
+  {
+    "input": "成功",
+    "output": "通用对话"
+  },
+  {
+    "input": "失败",
+    "output": "通用对话"
+  },
+  {
+    "input": "错误",
+    "output": "通用对话"
+  },
+  {
+    "input": "正确",
+    "output": "通用对话"
+  },
+  {
+    "input": "对",
+    "output": "通用对话"
+  },
+  {
+    "input": "不对",
+    "output": "通用对话"
+  },
+  {
+    "input": "是的",
+    "output": "通用对话"
+  },
+  {
+    "input": "不是",
+    "output": "通用对话"
+  },
+  {
+    "input": "当然",
+    "output": "通用对话"
+  },
+  {
+    "input": "肯定",
+    "output": "通用对话"
+  },
+  {
+    "input": "确定",
+    "output": "通用对话"
+  },
+  {
+    "input": "不确定",
+    "output": "通用对话"
+  },
+  {
+    "input": "可能",
+    "output": "通用对话"
+  },
+  {
+    "input": "也许",
+    "output": "通用对话"
+  },
+  {
+    "input": "或许",
+    "output": "通用对话"
+  },
+  {
+    "input": "大概",
+    "output": "通用对话"
+  },
+  {
+    "input": "应该",
+    "output": "通用对话"
   }
 ]
