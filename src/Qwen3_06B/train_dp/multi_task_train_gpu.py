@@ -1,14 +1,20 @@
 import json
 import os
+import torch
 from typing import Dict, List, Tuple
 from datasets import Dataset, concatenate_datasets
 from peft import LoraConfig, get_peft_model, TaskType
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, DataCollatorForLanguageModeling
 from transformers import Trainer
+import logging
+
+# 设置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # 配置路径
 model_name = r"/content/drive/MyDrive/models/Qwen3-0.6B"
-output_model_path = r"/content/drive/MyDrive/train-models/Qwen3-multi-task"
+output_model_path = r"/content/drive/MyDrive/train-models/Qwen3-multi-task-GPU"
 
 # 数据集配置
 DATASET_CONFIG = {
@@ -56,41 +62,86 @@ class MultiTaskTrainer:
         self.output_path = output_path
         self.tokenizer = None
         self.model = None
+        self.device = self._setup_device()
+
+    def _setup_device(self):
+        """设置GPU设备"""
+        if torch.cuda.is_available():
+            device = torch.device("cuda")
+            logger.info(f"使用GPU: {torch.cuda.get_device_name(0)}")
+            logger.info(f"GPU内存: {torch.cuda.get_device_properties(0).total_memory / 1024 ** 3:.1f} GB")
+
+            # 清理GPU缓存
+            torch.cuda.empty_cache()
+
+            # 设置GPU内存分配策略
+            torch.cuda.set_per_process_memory_fraction(0.9)  # 使用90%的GPU内存
+
+        else:
+            device = torch.device("cpu")
+            logger.warning("CUDA不可用，使用CPU训练")
+
+        return device
 
     def load_model_and_tokenizer(self):
-        """加载模型和分词器"""
-        print("正在加载模型和分词器...")
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
+        """加载模型和分词器 - GPU优化版本"""
+        logger.info("正在加载模型和分词器...")
+
+        # 加载分词器
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.model_name,
+            trust_remote_code=True,
+            padding_side="right"  # 确保padding在右侧
+        )
+
+        # 设置pad_token
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        # 加载模型 - GPU优化
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
             trust_remote_code=True,
-            torch_dtype="auto"  # 自动选择数据类型
+            torch_dtype=torch.float16 if self.device.type == "cuda" else torch.float32,  # GPU使用fp16
+            device_map="auto" if self.device.type == "cuda" else None,  # 自动设备映射
+            low_cpu_mem_usage=True,  # 减少CPU内存使用
         )
 
-        # 配置LoRA - 针对CPU环境优化
+        # 配置LoRA - GPU优化
         peft_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
-            r=8,  # 降低秩以减少计算量
-            lora_alpha=16,  # 保持合理的alpha/r比例
-            lora_dropout=0.1,  # 适度dropout防止过拟合
-            target_modules=["q_proj", "v_proj"],  # 只针对关键模块
+            r=16,  # GPU环境可以使用更高的秩
+            lora_alpha=32,  # 相应调整alpha
+            lora_dropout=0.05,  # 降低dropout
+            target_modules=["q_proj", "v_proj", "k_proj", "o_proj"],  # 增加更多目标模块
+            bias="none",
         )
+
         self.model = get_peft_model(self.model, peft_config)
         self.model.print_trainable_parameters()
+
+        # 确保模型在正确的设备上
+        if self.device.type == "cuda":
+            self.model = self.model.to(self.device)
 
     def load_json_data(self, file_path: str) -> List[Dict]:
         """加载JSON数据"""
         if not os.path.exists(file_path):
-            print(f"警告: 文件 {file_path} 不存在，跳过该数据集")
+            logger.warning(f"文件 {file_path} 不存在，跳过该数据集")
             return []
 
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            logger.info(f"成功加载 {len(data)} 条数据从 {file_path}")
+            return data
+        except Exception as e:
+            logger.error(f"加载文件 {file_path} 时出错: {e}")
+            return []
 
     def prepare_dataset(self, task_name: str, config: Dict) -> Dataset:
         """为特定任务准备数据集"""
-        print(f"正在准备 {task_name} 数据集...")
+        logger.info(f"正在准备 {task_name} 数据集...")
 
         # 加载原始数据
         raw_data = self.load_json_data(config["file_path"])
@@ -113,7 +164,7 @@ class MultiTaskTrainer:
         return Dataset.from_list(processed_data)
 
     def preprocess_function(self, examples):
-        """统一的预处理函数，支持多任务"""
+        """统一的预处理函数，支持多任务 - GPU优化版本"""
         inputs = []
         targets = []
 
@@ -150,11 +201,12 @@ class MultiTaskTrainer:
 
         # 拼接输入和目标输出
         full_texts = [f"{inp}{tgt}{self.tokenizer.eos_token}" for inp, tgt in zip(inputs, targets)]
-        # print(f"full_texts:{full_texts}")
-        # 编码
+
+        # 编码 - GPU优化：增加最大长度
+        max_length = 1024 if self.device.type == "cuda" else 512  # GPU环境使用更长序列
         model_inputs = self.tokenizer(
             full_texts,
-            max_length=512,  # 增加最大长度以适应复杂任务
+            max_length=max_length,
             truncation=True,
             padding="max_length",
             return_overflowing_tokens=False,
@@ -164,7 +216,7 @@ class MultiTaskTrainer:
         # 构建标签：输入部分标记为-100
         input_only = self.tokenizer(
             inputs,
-            max_length=512,
+            max_length=max_length,
             truncation=True,
             padding="max_length"
         )
@@ -176,7 +228,7 @@ class MultiTaskTrainer:
             # 输入部分标签设为-100，目标部分保留原id
             label = [-100] * input_len + full_input_ids[input_len:]
             # 确保长度正确
-            label = label[:512] + [-100] * max(0, 512 - len(label))
+            label = label[:max_length] + [-100] * max(0, max_length - len(label))
             labels.append(label)
 
         model_inputs["labels"] = labels
@@ -184,13 +236,13 @@ class MultiTaskTrainer:
 
     def prepare_multi_task_dataset(self) -> Dataset:
         """准备多任务数据集"""
-        print("正在准备多任务数据集...")
+        logger.info("正在准备多任务数据集...")
 
         all_datasets = []
         for task_name, config in DATASET_CONFIG.items():
             dataset = self.prepare_dataset(task_name, config)
             if dataset is not None:
-                print(f"{task_name} 数据集包含 {len(dataset)} 个样本")
+                logger.info(f"{task_name} 数据集包含 {len(dataset)} 个样本")
                 all_datasets.append(dataset)
 
         if not all_datasets:
@@ -198,16 +250,65 @@ class MultiTaskTrainer:
 
         # 合并所有数据集
         combined_dataset = concatenate_datasets(all_datasets)
-        print(f"合并后的数据集总共包含 {len(combined_dataset)} 个样本")
+        logger.info(f"合并后的数据集总共包含 {len(combined_dataset)} 个样本")
 
         # 打乱数据
         combined_dataset = combined_dataset.shuffle(seed=42)
 
         return combined_dataset
 
+    def get_training_args(self) -> TrainingArguments:
+        """获取训练参数 - GPU优化版本"""
+        if self.device.type == "cuda":
+            # T4 GPU优化参数
+            return TrainingArguments(
+                output_dir="./results",
+                per_device_train_batch_size=8,  # T4可以处理更大的batch size
+                gradient_accumulation_steps=4,  # 梯度累积以增加有效batch size
+                num_train_epochs=3,  # GPU环境可以更快完成训练
+                learning_rate=5e-5,  # 适中的学习率
+                warmup_steps=500,  # 预热步数
+                logging_steps=100,
+                save_steps=1000,
+                save_total_limit=3,
+                evaluation_strategy="no",
+                save_strategy="steps",
+                fp16=True,  # 使用混合精度训练
+                dataloader_num_workers=4,  # 多进程数据加载
+                remove_unused_columns=False,
+                load_best_model_at_end=False,
+                metric_for_best_model="loss",
+                greater_is_better=False,
+                report_to="none",  # 可以改为"tensorboard"来启用日志
+                run_name=f"qwen3-multi-task-{torch.cuda.get_device_name(0).replace(' ', '-')}",
+                weight_decay=0.01,
+                adam_beta1=0.9,
+                adam_beta2=0.999,
+                adam_epsilon=1e-8,
+                max_grad_norm=1.0,  # 梯度裁剪
+                lr_scheduler_type="cosine",  # 余弦学习率调度
+                optim="adamw_torch",  # 优化器
+            )
+        else:
+            # CPU环境参数
+            return TrainingArguments(
+                output_dir="./results",
+                per_device_train_batch_size=2,
+                gradient_accumulation_steps=8,
+                num_train_epochs=5,
+                learning_rate=2e-4,
+                warmup_steps=100,
+                logging_steps=50,
+                save_strategy="no",
+                fp16=False,
+                dataloader_num_workers=0,
+                report_to="none",
+                weight_decay=0.01,
+            )
+
     def train(self):
-        """执行多任务训练"""
-        print("开始多任务训练...")
+        """执行多任务训练 - GPU优化版本"""
+        logger.info("开始多任务训练...")
 
         # 加载模型和分词器
         self.load_model_and_tokenizer()
@@ -216,30 +317,24 @@ class MultiTaskTrainer:
         dataset = self.prepare_multi_task_dataset()
 
         # 预处理数据
-        print("正在预处理数据...")
+        logger.info("正在预处理数据...")
         tokenized_dataset = dataset.map(
             self.preprocess_function,
             batched=True,
-            remove_columns=dataset.column_names  # 移除原始列
+            batch_size=1000 if self.device.type == "cuda" else 100,  # GPU环境使用更大的批处理
+            num_proc=4 if self.device.type == "cuda" else 1,  # GPU环境使用多进程
+            remove_columns=dataset.column_names,  # 移除原始列
+            desc="预处理数据集"
         )
 
-        # 训练参数 - 针对CPU环境优化
-        training_args = TrainingArguments(
-            output_dir="./results",
-            per_device_train_batch_size=2,  # CPU 友好
-            num_train_epochs=10,  # 减少训练轮数
-            logging_dir=None,  # 禁用日志
-            report_to="none",  # 禁用日志
-            save_strategy="no",  # 不保存中间结果
-            learning_rate=2e-4,  # 更低学习率
+        # 获取训练参数
+        training_args = self.get_training_args()
 
-            # gradient_accumulation_steps=8,  # 通过梯度累积增加有效批次大小
-            # logging_steps=50,
-            # save_total_limit=2,  # 只保留最近2个检查点
-            # dataloader_num_workers=0,  # CPU环境不使用多进程
-            # fp16=False,  # CPU不支持fp16
-            # warmup_steps=100,  # 预热步数
-            # weight_decay=0.01,  # 权重衰减
+        # 创建数据收集器
+        data_collator = DataCollatorForLanguageModeling(
+            tokenizer=self.tokenizer,
+            mlm=False,
+            pad_to_multiple_of=8 if self.device.type == "cuda" else None,  # GPU优化
         )
 
         # 创建Trainer
@@ -247,38 +342,78 @@ class MultiTaskTrainer:
             model=self.model,
             args=training_args,
             train_dataset=tokenized_dataset,
-            data_collator=DataCollatorForLanguageModeling(
-                tokenizer=self.tokenizer,
-                mlm=False
-            ),
+            data_collator=data_collator,
         )
 
+        # GPU内存监控
+        if self.device.type == "cuda":
+            logger.info(f"训练前GPU内存使用: {torch.cuda.memory_allocated() / 1024 ** 3:.2f} GB")
+            logger.info(f"训练前GPU内存缓存: {torch.cuda.memory_reserved() / 1024 ** 3:.2f} GB")
+
         # 开始训练
-        print("开始训练...")
-        trainer.train()
+        logger.info("开始训练...")
+        try:
+            trainer.train()
+        except RuntimeError as e:
+            if "out of memory" in str(e):
+                logger.error("GPU内存不足！尝试减少batch_size或使用梯度检查点")
+                # 可以在这里实现自动降低batch_size的逻辑
+                raise
+            else:
+                raise
+
+        # 训练后的GPU内存信息
+        if self.device.type == "cuda":
+            logger.info(f"训练后GPU内存使用: {torch.cuda.memory_allocated() / 1024 ** 3:.2f} GB")
+            logger.info(f"训练后GPU内存缓存: {torch.cuda.memory_reserved() / 1024 ** 3:.2f} GB")
 
         # 保存模型
-        print(f"保存模型到 {self.output_path}")
+        logger.info(f"保存模型到 {self.output_path}")
+        os.makedirs(self.output_path, exist_ok=True)
         self.model.save_pretrained(self.output_path)
         self.tokenizer.save_pretrained(self.output_path)
 
-        print("训练完成！")
+        # 清理GPU缓存
+        if self.device.type == "cuda":
+            torch.cuda.empty_cache()
+
+        logger.info("训练完成！")
+
+    def monitor_gpu_memory(self):
+        """监控GPU内存使用情况"""
+        if self.device.type == "cuda":
+            allocated = torch.cuda.memory_allocated() / 1024 ** 3
+            reserved = torch.cuda.memory_reserved() / 1024 ** 3
+            total = torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
+            logger.info(f"GPU内存 - 已分配: {allocated:.2f}GB, 已保留: {reserved:.2f}GB, 总计: {total:.2f}GB")
 
 
 def main():
     """主函数"""
+    logger.info("=== Qwen3 多任务训练 (Linux GPU优化版) ===")
+
+    # 检查CUDA可用性
+    if torch.cuda.is_available():
+        logger.info(f"CUDA版本: {torch.version.cuda}")
+        logger.info(f"PyTorch版本: {torch.__version__}")
+        logger.info(f"可用GPU数量: {torch.cuda.device_count()}")
+        for i in range(torch.cuda.device_count()):
+            logger.info(f"GPU {i}: {torch.cuda.get_device_name(i)}")
+    else:
+        logger.warning("CUDA不可用，将使用CPU训练")
+
     # 创建训练器
     trainer = MultiTaskTrainer(model_name, output_model_path)
 
     # 执行训练
-    trainer.train()
+    try:
+        trainer.train()
+    except KeyboardInterrupt:
+        logger.info("训练被用户中断")
+    except Exception as e:
+        logger.error(f"训练过程中出现错误: {e}")
+        raise
 
 
 if __name__ == '__main__':
-    # 对于Windows系统，添加这个函数调用
-    from multiprocessing import freeze_support
-
-    freeze_support()
-
-    # 调用主函数
     main()
