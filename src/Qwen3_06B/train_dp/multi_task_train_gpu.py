@@ -399,7 +399,7 @@ class MultiTaskTrainer:
                 logging_steps=50,
                 save_strategy="no",
                 fp16=False,
-                dataloader_num_workers=0,
+                dataloader_num_workers=2,
                 # dataloader_worker_init_fn=worker_init_fn,  # CPU版本也添加
                 report_to="none",
                 weight_decay=0.01,
@@ -423,7 +423,7 @@ class MultiTaskTrainer:
             preprocess_function,  # 独立函数
             batched=True,
             batch_size=100 if self.device.type == "cuda" else 50,  # 减少批处理大小
-            num_proc=1,  # 单进程避免内存冲突
+            num_proc=2,  # 单进程避免内存冲突
             remove_columns=dataset.column_names,
             desc="预处理数据集",
             # 传递必要参数，避免序列化Trainer实例

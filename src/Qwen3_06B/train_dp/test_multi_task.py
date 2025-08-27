@@ -1,95 +1,102 @@
-"""
-多任务训练代码测试脚本
-用于验证数据加载和预处理功能
-"""
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+import torch
+from typing import List, Dict, Any
 
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from peft import PeftModel
 
-from multi_task_train import MultiTaskTrainer, DATASET_CONFIG
+# 配置路径
+base_model_path = r"E:\project\llm\model-data\base-models\Qwen3-0.6B"
+fine_tuned_model_path = r"E:\project\llm\model-data\train-models\Qwen3-multi-task"
 
-def test_data_loading():
-    """测试数据加载功能"""
-    print("=== 测试数据加载功能 ===")
-    
-    trainer = MultiTaskTrainer("dummy_model", "dummy_output")
-    
-    for task_name, config in DATASET_CONFIG.items():
-        print(f"\n测试 {task_name} 数据集:")
-        print(f"  文件路径: {config['file_path']}")
-        print(f"  任务类型: {config['task_type']}")
-        
-        # 检查文件是否存在
-        if os.path.exists(config['file_path']):
-            print(f"  ✓ 文件存在")
-            
-            # 加载数据
-            data = trainer.load_json_data(config['file_path'])
-            if data:
-                print(f"  ✓ 数据加载成功，包含 {len(data)} 个样本")
-                
-                # 显示第一个样本
-                if len(data) > 0:
-                    sample = data[0]
-                    print(f"  样本示例:")
-                    print(f"    输入: {sample.get('input', 'N/A')[:50]}...")
-                    print(f"    输出: {sample.get('output', 'N/A')[:50]}...")
-            else:
-                print(f"  ✗ 数据加载失败")
-        else:
-            print(f"  ✗ 文件不存在")
 
-def test_dataset_preparation():
-    """测试数据集准备功能"""
-    print("\n=== 测试数据集准备功能 ===")
-    
-    trainer = MultiTaskTrainer("dummy_model", "dummy_output")
-    
-    for task_name, config in DATASET_CONFIG.items():
-        if os.path.exists(config['file_path']):
-            print(f"\n准备 {task_name} 数据集:")
-            
-            try:
-                dataset = trainer.prepare_dataset(task_name, config)
-                if dataset is not None:
-                    print(f"  ✓ 数据集准备成功，包含 {len(dataset)} 个样本")
-                    
-                    # 显示数据集结构
-                    if len(dataset) > 0:
-                        sample = dataset[0]
-                        print(f"  数据集字段: {list(sample.keys())}")
-                        print(f"  任务名称: {sample['task_name']}")
-                        print(f"  任务类型: {sample['task_type']}")
-                else:
-                    print(f"  ✗ 数据集准备失败")
-            except Exception as e:
-                print(f"  ✗ 数据集准备出错: {e}")
+def load_model_and_tokenizer():
+    """加载模型和tokenizer"""
 
-def test_system_prompts():
-    """测试系统提示词"""
-    print("\n=== 测试系统提示词 ===")
-    
-    for task_name, config in DATASET_CONFIG.items():
-        print(f"\n{task_name} 系统提示词:")
-        print(f"  {config['system_prompt'][:100]}...")
+    tokenizer = AutoTokenizer.from_pretrained(base_model_path)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    model = AutoModelForCausalLM.from_pretrained(
+        base_model_path,
+        device_map="cpu",
+        trust_remote_code=True
+    )
+
+    # 2. 加载微调后的适配器参数
+    model = PeftModel.from_pretrained(model, fine_tuned_model_path)
+
+    # 3. （可选）合并基础模型与适配器参数，提升推理速度
+    model = model.merge_and_unload()
+
+    # 启用评估模式
+    model.eval()
+    return model, tokenizer
+
+
+def test_function_calling(model, tokenizer, query: str) -> str:
+    """测试模型的function calling能力"""
+    # 编码输入
+    inputs = tokenizer(query, return_tensors="pt").to(model.device)
+
+    # 生成回答
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=200,
+            temperature=0.3,
+            top_p=0.9,
+            do_sample=True,
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id
+        )
+
+    # 解码输出
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    # 提取模型回答部分（去除提示部分）
+    # response = response[len(prompt):].strip()
+
+    return response
+
 
 def main():
-    """主测试函数"""
-    print("开始测试多任务训练代码...")
-    
-    try:
-        test_data_loading()
-        test_dataset_preparation()
-        test_system_prompts()
-        
-        print("\n=== 测试完成 ===")
-        print("所有基础功能测试通过！")
-        
-    except Exception as e:
-        print(f"\n测试过程中出现错误: {e}")
-        import traceback
-        traceback.print_exc()
+    # 加载微调后的模型
+    print("加载微调后的模型...")
+    fine_tuned_model, tokenizer = load_model_and_tokenizer()
+
+    """交互式测试模式"""
+    print(f"\n{'=' * 80}")
+    print("进入交互式测试模式")
+    print("输入 'quit' 或 'exit' 退出")
+    print(f"{'=' * 80}")
+
+    while True:
+        try:
+            user_input = input("\n请输入您的问题: ").strip()
+
+            if user_input.lower() in ['quit', 'exit', '退出']:
+                print("退出交互式测试模式")
+                break
+
+            if not user_input:
+                continue
+
+            print(f"\n处理中...")
+
+            # 生成响应
+
+            response = test_function_calling(fine_tuned_model, tokenizer, user_input)
+
+            print(f"\n{'=' * 60}")
+            print(f"用户: {user_input}")
+            print(f"助手1: {response}")
+
+        except KeyboardInterrupt:
+            print("\n\n用户中断，退出交互式测试模式")
+            break
+        except Exception as e:
+            print(f"处理时出错: {e}")
+            continue
+
 
 if __name__ == "__main__":
     main()
