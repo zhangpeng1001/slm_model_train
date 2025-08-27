@@ -196,15 +196,20 @@ class MultiTaskTrainer:
         if self.device.type == "cuda":
             self.model = self.model.to(self.device)
         
-        # 确保模型参数需要梯度
+        # 确保模型处于训练模式
         self.model.train()
-        for param in self.model.parameters():
-            if param.requires_grad:
-                param.requires_grad_(True)
         
-        # 启用梯度检查点
-        if hasattr(self.model, 'gradient_checkpointing_enable'):
-            self.model.gradient_checkpointing_enable()
+        # 检查可训练参数
+        trainable_params = 0
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                trainable_params += param.numel()
+                logger.debug(f"可训练参数: {name}, shape: {param.shape}")
+        
+        logger.info(f"总可训练参数数量: {trainable_params:,}")
+        
+        # 不启用梯度检查点，因为它与LoRA可能有兼容性问题
+        # 通过减少batch_size和序列长度来节省内存
 
     def load_json_data(self, file_path: str) -> List[Dict]:
         """加载JSON数据"""
