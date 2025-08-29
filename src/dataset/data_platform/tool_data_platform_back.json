@@ -1,96 +1,5 @@
 [
   {
-    "input": "我有一批西安市地类图斑的数据，怎么进行发服务",
-    "output": "西安市地类图斑"
-  },
-    {
-    "input": "请帮我把实景三维模型成果数据进行治理",
-    "output": "实景三维模型成果"
-  },
-    {
-    "input": "我已经上传了单波段浮点投影的数据，现在想进行入库",
-    "output": "单波段浮点投影"
-  },
-    {
-    "input": "有一些遥感影像数据需要处理",
-    "output": "遥感影像"
-  },
-    {
-    "input": "DEM高程数据怎么进行质量检查",
-    "output": "DEM高程"
-  },
-    {
-    "input": "矢量地形图数据如何入库",
-    "output": "矢量地形图"
-  },
-    {
-    "input": "我的点云数据处理完了，如何发布服务",
-    "output": "点云"
-  },
-    {
-    "input": "正射影像数据需要进行坐标转换",
-    "output": "正射影像"
-  },
-    {
-    "input": "地理信息数据库的数据怎么备份",
-    "output": "地理信息数据库"
-  },
-    {
-    "input": "卫星遥感数据的预处理流程是什么",
-    "output": "卫星遥感"
-  },
-    {
-    "input": "无人机航拍数据如何进行几何纠正",
-    "output": "无人机航拍"
-  },
-    {
-    "input": "激光雷达数据的格式转换",
-    "output": "激光雷达"
-  },
-  {
-    "input": "地籍调查数据需要标准化处理",
-    "output": "地籍调查"
-  },
-  {
-    "input": "土地利用现状数据怎么更新",
-    "output": "土地利用现状"
-  },
-  {
-    "input": "城市三维建模数据的质量控制",
-    "output": "城市三维建模"
-  },
-
-
-  {
-    "input": "矢量地形图数据如何入库",
-    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename\":\"矢量地形图\",\"query_content\":\"存储目录\"}}</tool_call>"
-  },
-  {
-    "input": "城市三维建模数据的质量控制",
-    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename\":\"城市三维建模\",\"file_format\":\"CSV\",\"query_content\": [\"创建时间\",\"数据大小\"]}}</tool_call>"
-  },
-  {
-    "input": "我要找文件名以2024Q1_销售汇总_开头的Parquet文件，查一下这些文件对应的数据源是哪个系统",
-    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_prefix\":\"2024Q1_销售汇总_\",\"file_format\":\"Parquet\",\"query_content\":\"数据源系统\"}}</tool_call>"
-  },
-  {
-    "input": "麻烦查一下文件名logistics_status_20240520_12.csv的数据，获取它的存储路径和关联的数据表",
-    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename\":\"logistics_status_20240520_12.csv\",\"query_content\": [\"存储路径\",\"关联数据表\"]}}</tool_call>"
-  },
-  {
-    "input": "查找所有文件名末尾是_test.txt的文件，看看它们的最近修改时间和数据所有者",
-    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_suffix\":\"_test.txt\",\"file_format\":\"TXT\",\"query_content\": [\"最近修改时间\",\"数据所有者\"]}}</tool_call>"
-  },
-
-
-
-
-
-
-
-
-
-  {
     "input": "帮我采集昨天电商平台的用户订单数据，数据源是京东自营订单表",
     "output": "<tool_call>{\"name\":\"get_data_collection\",\"arguments\": {\"data_source\":\"京东自营订单表\",\"data_type\":\"用户订单数据\",\"time_range\":\"昨天\",\"business_platform\":\"电商平台\"}}</tool_call>"
   },
@@ -149,6 +58,26 @@
   {
     "input": "从S3数据湖采集2024年上半年的用户反馈数据，存储桶是s3://feedback-data/",
     "output": "<tool_call>{\"name\":\"get_data_collection\",\"arguments\": {\"data_source_type\":\"S3数据湖\",\"data_type\":\"用户反馈数据\",\"time_range\":\"2024年上半年\",\"storage_path\":\"s3://feedback-data/\"}}</tool_call>"
+  },
+  {
+    "input": "帮我查一下文件名是20240520_电商订单_北京.xlsx的数据，看看它存在哪个目录里",
+    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename\":\"20240520_电商订单_北京.xlsx\",\"query_content\":\"存储目录\"}}</tool_call>"
+  },
+  {
+    "input": "查询文件名包含用户画像_v2的所有CSV文件，需要知道它们的创建时间和数据大小",
+    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_keyword\":\"用户画像_v2\",\"file_format\":\"CSV\",\"query_content\": [\"创建时间\",\"数据大小\"]}}</tool_call>"
+  },
+  {
+    "input": "我要找文件名以2024Q1_销售汇总_开头的Parquet文件，查一下这些文件对应的数据源是哪个系统",
+    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_prefix\":\"2024Q1_销售汇总_\",\"file_format\":\"Parquet\",\"query_content\":\"数据源系统\"}}</tool_call>"
+  },
+  {
+    "input": "麻烦查一下文件名logistics_status_20240520_12.csv的数据，获取它的存储路径和关联的数据表",
+    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename\":\"logistics_status_20240520_12.csv\",\"query_content\": [\"存储路径\",\"关联数据表\"]}}</tool_call>"
+  },
+  {
+    "input": "查找所有文件名末尾是_test.txt的文件，看看它们的最近修改时间和数据所有者",
+    "output": "<tool_call>{\"name\":\"query_data_by_filename\",\"arguments\": {\"filename_suffix\":\"_test.txt\",\"file_format\":\"TXT\",\"query_content\": [\"最近修改时间\",\"数据所有者\"]}}</tool_call>"
   },
   {
     "input": "把HDFS路径/hive/ods/order/20240520/下的订单数据全量入库到Hive的dw_orders库的order_detail表",

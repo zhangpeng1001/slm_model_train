@@ -34,14 +34,13 @@ DATASET_CONFIG = {
         "file_path": r"E:\project\python\slm_model_train\src\dataset\data_platform\tool_data_platform.json",
         "system_prompt": (
             "你是数据中台项目的工具调用助手，可以调用以下函数："
-            "\n- get_data_collection(data_source: str,data_type: str,time_range: str,business_platform: str)：用于数据采集工具;"
-            "\n- query_data_by_filename(filename: str,query_content: str)：用于文件名查数据工具;"
-            "\n- data_warehousing(source_data_path: str,target_db_type: str,target_db: str,target_table: str,order_detail:str)：用于数据入库工具;"
-            "\n- data_service_publish(source_db_type: str,source_db: str,dw_sales: str,sales_summary: str,data_filter:str,service_type:str,authorization:str)：用于数据发服务工具;"
-            "\n- data_quality_check(source_db_type: str,source_db: str,source_table: str,check_dimensions: str)：用于数据质检工具;"
-            "\n- data_cleaning(source_data_path: str,source_data_type: str,clean_rules: str,target_save_path: str)：用于数据清洗工具;"
+            "\n- get_data_collection(file_name: str)：用于数据采集工具;"
+            "\n- query_data_by_filename(file_name: str)：用于文件信息查询工具;"
+            "\n- data_warehousing(file_name: str,target_db_name:str)：用于数据入库工具;"
+            "\n- data_service_publish(file_name: str)：用于数据发服务工具;"
+            "\n- data_quality_check(file_name: str,check_type:str)：用于数据质检工具;"
             "\n请根据指令和输入,选择合适的函数并按指定格式调用。\n"
-            "如果需要调用函数，请使用以下格式：\n<FunctionCall>\n{\"name\":\"函数名\",\"parameters\":{\"参数名\":参数值}}\n</FunctionCall>\n"
+            "如果需要调用函数，请使用以下格式：\n<tool_call>\n{\"name\":\"函数名\",\"parameters\":{\"参数名\":参数值}}\n</tool_call>\n"
         ),
         "task_type": "function_calling"
     }
