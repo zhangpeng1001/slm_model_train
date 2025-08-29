@@ -18,112 +18,41 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 配置路径
-model_name = r"/content/drive/MyDrive/models/Qwen3-0.6B"
-output_model_path = r"/content/drive/MyDrive/train-models/Qwen3-multi-task-GPU"
+model_name = r"/mnt/workspace/base_model/Qwen3-0.6B"
+output_model_path = r"/mnt/workspace/train_model/Qwen3-multi-task"
 
 # 数据集配置
 DATASET_CONFIG = {
     "data_extraction": {
-        "file_path": r"/content/drive/MyDrive/dp_dataset/data_extraction.json",
+        "file_path": r"/mnt/workspace/project/dataset/data_extraction.json",
         "system_prompt": "你是一个专业的数据提取助手。任务是分析用户输入的文本，提取用户描述的数据名称",
         "task_type": "extraction"
     },
     "dp_qa": {
-        "file_path": r"/content/drive/MyDrive/dp_dataset/dp_qa.json",
+        "file_path": r"/mnt/workspace/project/dataset/dp_qa.json",
         "system_prompt": "你是一个专业的数据平台问答助手。任务是分析用户输入的问题，并提供答案给用户",
         "task_type": "qa"
     },
     "question_classifier": {
-        "file_path": r"/content/drive/MyDrive/dp_dataset/question_classifier.json",
+        "file_path": r"/mnt/workspace/project/dataset/question_classifier.json",
         "system_prompt": "你是一个专业的问题分类助手。任务是分析用户输入的文本，判断用户的问题类型是（数据平台相关、通用对话、无关问题）中哪一个",
         "task_type": "classification"
     },
-    "question_type_classifier": {
-        "file_path": r"/content/drive/MyDrive/dp_dataset/question_type_classifier.json",
-        "system_prompt": "你是一个专业的问题类型分类助手。任务是分析用户输入的文本，判断用户的问题类型是（问题回答、任务处理）中哪一个",
-        "task_type": "classification"
-    },
     "tool_data_platform": {
-        "file_path": r"/content/drive/MyDrive/dp_dataset/tool_data_platform.json",
+        "file_path": r"/mnt/workspace/project/dataset/tool_data_platform.json",
         "system_prompt": (
             "你是数据中台项目的工具调用助手，可以调用以下函数："
-            "\n- get_data_collection(data_source: str,data_type: str,time_range: str,business_platform: str)：用于数据采集工具;"
-            "\n- query_data_by_filename(filename: str,query_content: str)：用于文件名查数据工具;"
-            "\n- data_warehousing(source_data_path: str,target_db_type: str,target_db: str,target_table: str,order_detail:str)：用于数据入库工具;"
-            "\n- data_service_publish(source_db_type: str,source_db: str,dw_sales: str,sales_summary: str,data_filter:str,service_type:str,authorization:str)：用于数据发服务工具;"
-            "\n- data_quality_check(source_db_type: str,source_db: str,source_table: str,check_dimensions: str)：用于数据质检工具;"
-            "\n- data_cleaning(source_data_path: str,source_data_type: str,clean_rules: str,target_save_path: str)：用于数据清洗工具;"
+            "\n- get_data_collection(file_name: str)：用于数据采集工具;"
+            "\n- query_data_by_filename(file_name: str)：用于文件信息查询工具;"
+            "\n- data_warehousing(file_name: str,target_db_name:str)：用于数据入库工具;"
+            "\n- data_service_publish(file_name: str)：用于数据发服务工具;"
+            "\n- data_quality_check(file_name: str,check_type:str)：用于数据质检工具;"
             "\n请根据指令和输入,选择合适的函数并按指定格式调用。\n"
-            "如果需要调用函数，请使用tool_call标签，格式示例如下：\n<tool_call>\n{\"name\":\"get_data_collection\",\"arguments\":{\"data_source\":\"京东自营订单表\",\"data_type\":\"用户订单数据\",\"time_range\":\"昨天\"}}\n</tool_call>\n"
+            "如果需要调用函数，请使用以下格式：\n<tool_call>\n{\"name\":\"函数名\",\"parameters\":{\"参数名\":参数值}}\n</tool_call>\n"
         ),
         "task_type": "function_calling"
     }
 }
-
-
-# ---------------------- 1. 把preprocess_function改为独立函数 ----------------------
-def preprocess_function(examples, tokenizer, device, max_length):
-    """独立的预处理函数，不依赖Trainer实例属性"""
-    inputs = []
-    targets = []
-
-    for i in range(len(examples["input"])):
-        # 逻辑与之前一致，但不再使用self.xxx，而是从参数获取
-        task_name = examples["task_name"][i]
-        task_type = examples["task_type"][i]
-        system_prompt = examples["system_prompt"][i]
-        user_input = examples["input"][i]
-        expected_output = examples["output"][i]
-        instruction = examples.get("instruction", [""] * len(examples["input"]))[i]
-
-        # 构建prompt的逻辑完全不变
-        if task_type == "function_calling":
-            prompt = system_prompt + f"\nInput: {user_input}\nOutput: "
-        elif task_type == "classification":
-            prompt = system_prompt + f"\n问题: {user_input}\n分类结果: "
-        elif task_type == "extraction":
-            prompt = system_prompt + f"\n输入文本: {user_input}\n提取的数据名称: "
-        elif task_type == "qa":
-            if instruction:
-                prompt = system_prompt + f"\nInstruction: {instruction}\nInput: {user_input}\nOutput: "
-            else:
-                prompt = system_prompt + f"\n问题: {user_input}\n回答: "
-        else:
-            prompt = system_prompt + f"\nInput: {user_input}\nOutput: "
-
-        inputs.append(prompt)
-        targets.append(expected_output)
-
-    # 拼接输入和目标输出
-    full_texts = [f"{inp}{tgt}{tokenizer.eos_token}" for inp, tgt in zip(inputs, targets)]
-
-    # 编码（使用传递的tokenizer和max_length）
-    model_inputs = tokenizer(
-        full_texts,
-        max_length=max_length,
-        truncation=True,
-        padding="max_length",
-        return_overflowing_tokens=False,
-        return_length=False
-    )
-
-    # 构建标签（逻辑不变）
-    input_only = tokenizer(
-        inputs,
-        max_length=max_length,
-        truncation=True,
-        padding="max_length"
-    )
-
-    labels = []
-    for input_ids, full_input_ids in zip(input_only["input_ids"], model_inputs["input_ids"]):
-        input_len = len([id for id in input_ids if id != tokenizer.pad_token_id])
-        label = [-100] * input_len + full_input_ids[input_len:]
-        label = label[:max_length] + [-100] * max(0, max_length - len(label))
-        labels.append(label)
-
-    model_inputs["labels"] = labels
-    return model_inputs
 
 
 class MultiTaskTrainer:
@@ -133,6 +62,11 @@ class MultiTaskTrainer:
         self.tokenizer = None
         self.model = None
         self.device = self._setup_device()
+        # 从tokenizer获取chat_template的核心特殊token（确保与tokenizer_config一致）
+        self.im_start = "<|im_start|>"
+        self.im_end = "<|im_end|>"  # 即tokenizer.eos_token
+        self.tool_call_start = "<tool_call>"
+        self.tool_call_end = "</tool_call>"
 
     def _setup_device(self):
         """设置GPU设备"""
@@ -195,19 +129,19 @@ class MultiTaskTrainer:
         # 确保模型在正确的设备上
         if self.device.type == "cuda":
             self.model = self.model.to(self.device)
-        
+
         # 确保模型处于训练模式
         self.model.train()
-        
+
         # 检查可训练参数
         trainable_params = 0
         for name, param in self.model.named_parameters():
             if param.requires_grad:
                 trainable_params += param.numel()
                 logger.debug(f"可训练参数: {name}, shape: {param.shape}")
-        
+
         logger.info(f"总可训练参数数量: {trainable_params:,}")
-        
+
         # 不启用梯度检查点，因为它与LoRA可能有兼容性问题
         # 通过减少batch_size和序列长度来节省内存
 
@@ -250,47 +184,41 @@ class MultiTaskTrainer:
 
         return Dataset.from_list(processed_data)
 
-    def preprocess_function(self, examples):
-        """统一的预处理函数，支持多任务 - GPU优化版本"""
-        inputs = []
-        targets = []
+    def preprocess_function(self, examples, max_length):
+        inputs = []  # 对应“system + user”的完整输入（带角色标记）
+        targets = []  # 对应“assistant”的输出（带角色标记和工具标签）
 
         for i in range(len(examples["input"])):
+            # 提取单条样本的字段
             task_name = examples["task_name"][i]
             task_type = examples["task_type"][i]
-            system_prompt = examples["system_prompt"][i]
-            user_input = examples["input"][i]
-            expected_output = examples["output"][i]
-            instruction = examples.get("instruction", [""] * len(examples["input"]))[i]
+            system_prompt = examples["system_prompt"][i].strip()  # 清理空行
+            user_input = examples["input"][i].strip()
+            expected_output = examples["output"][i].strip()
 
-            # 根据任务类型构建不同的输入格式
-            if task_type == "function_calling":
-                # 工具调用任务
-                prompt = system_prompt + f"\nInput: {user_input}\nOutput: "
-            elif task_type == "classification":
-                # 分类任务
-                prompt = system_prompt + f"\n问题: {user_input}\n分类结果: "
-            elif task_type == "extraction":
-                # 数据提取任务
-                prompt = system_prompt + f"\n输入文本: {user_input}\n提取的数据名称: "
-            elif task_type == "qa":
-                # 问答任务
-                if instruction:
-                    prompt = system_prompt + f"\nInstruction: {instruction}\nInput: {user_input}\nOutput: "
-                else:
-                    prompt = system_prompt + f"\n问题: {user_input}\n回答: "
-            else:
-                # 默认格式
-                prompt = system_prompt + f"\nInput: {user_input}\nOutput: "
+            # -------------------------- 1. 构建带角色标记的System + User输入 --------------------------
+            # 遵循chat_template：<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_input}<|im_end|>
 
-            inputs.append(prompt)
-            targets.append(expected_output)
+            # 拼接system和user（chat_template的核心角色结构）
+            prompt_with_role = (
+                f"{self.im_start}system\n{system_prompt}{self.im_end}\n"
+                f"{self.im_start}user\n{user_input}{self.im_end}\n"
+                f"{self.im_start}assistant\n"  # 标记“接下来是模型需要学习的回复”
+            )
 
-        # 拼接输入和目标输出
-        full_texts = [f"{inp}{tgt}{self.tokenizer.eos_token}" for inp, tgt in zip(inputs, targets)]
+            # -------------------------- 2. 构建带格式的Assistant目标输出 --------------------------
+            # 根据任务类型，适配chat_template的输出格式（尤其是工具调用）
+            target_with_format = f"{expected_output}{self.im_end}"
+            # 加入列表
+            inputs.append(prompt_with_role)
+            targets.append(target_with_format)
 
-        # 编码 - GPU优化：增加最大长度
-        max_length = 1024 if self.device.type == "cuda" else 512  # GPU环境使用更长序列
+        # -------------------------- 3. 构建完整训练文本（输入+目标） --------------------------
+        # 格式：prompt_with_role（system+user+assistant开头） + target_with_format（assistant的回复）
+        full_texts = [inp + tgt for inp, tgt in zip(inputs, targets)]
+        # 无需额外加eos_token：因为target_with_format已包含<|im_end|>（而tokenizer.eos_token就是<|im_end|>）
+
+        # -------------------------- 4. 编码（与原逻辑一致，但输入格式已对齐chat_template） --------------------------
         model_inputs = self.tokenizer(
             full_texts,
             max_length=max_length,
@@ -300,22 +228,28 @@ class MultiTaskTrainer:
             return_length=False
         )
 
-        # 构建标签：输入部分标记为-100
-        input_only = self.tokenizer(
-            inputs,
-            max_length=max_length,
+        # -------------------------- 5. 构建标签（修正输入长度计算逻辑） --------------------------
+        # 关键：input_only需与prompt_with_role完全一致（带角色标记），才能准确分割输入/目标
+        input_only_encodings = self.tokenizer(
+            inputs,  # 这里的inputs是“system+user+assistant开头”的部分
+            max_length=512,
             truncation=True,
-            padding="max_length"
+            padding="max_length",
+            return_overflowing_tokens=False
         )
 
         labels = []
-        for input_ids, full_input_ids in zip(input_only["input_ids"], model_inputs["input_ids"]):
-            # 找到输入部分的结束位置
-            input_len = len([id for id in input_ids if id != self.tokenizer.pad_token_id])
-            # 输入部分标签设为-100，目标部分保留原id
+        for input_ids, full_input_ids in zip(input_only_encodings["input_ids"], model_inputs["input_ids"]):
+            # 计算输入部分的有效长度（排除pad_token）
+            input_len = 0
+            for id in input_ids:
+                if id == self.tokenizer.pad_token_id:
+                    break
+                input_len += 1
+            # 输入部分（input_len之前）标记为-100（模型不学习），目标部分保留原id
             label = [-100] * input_len + full_input_ids[input_len:]
-            # 确保长度正确
-            label = label[:max_length] + [-100] * max(0, max_length - len(label))
+            # 确保标签长度与max_length一致
+            label = label[:512] + [-100] * max(0, 512 - len(label))
             labels.append(label)
 
         model_inputs["labels"] = labels
@@ -420,16 +354,16 @@ class MultiTaskTrainer:
         # 大幅减少序列长度以节省内存
         max_length = 512 if self.device.type == "cuda" else 256
         tokenized_dataset = dataset.map(
-            preprocess_function,  # 独立函数
+            self.preprocess_function,  # 独立函数
             batched=True,
             batch_size=100 if self.device.type == "cuda" else 50,  # 减少批处理大小
-            num_proc=2,  # 单进程避免内存冲突
+            num_proc=1,  # 单进程避免内存冲突
             remove_columns=dataset.column_names,
             desc="预处理数据集",
             # 传递必要参数，避免序列化Trainer实例
             fn_kwargs={
-                "tokenizer": self.tokenizer,
-                "device": self.device,
+                # "tokenizer": self.tokenizer,
+                # "device": self.device,
                 "max_length": max_length
             }
         )
