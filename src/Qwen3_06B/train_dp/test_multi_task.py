@@ -1,6 +1,5 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
-from typing import List, Dict, Any
 
 from peft import PeftModel
 
@@ -57,6 +56,54 @@ def test_function_calling(model, tokenizer, query: str) -> str:
 
     return response
 
+# user 用户、assistant 助手、system 系统指令
+def test_query_pipeline(model, tokenizer, query: str) -> str:
+    """基于模型 tokenizer_config.json文件的内容，根据 chat_template 重构查询：Hugging Face Pipeline（快速调用）"""
+    # Pipeline自动用chat_template格式化messages
+    chatbot = pipeline("conversational", model=model, tokenizer=tokenizer)  # type: ignore
+
+    chatbot = pipeline(
+        task="conversational",
+        tools=[
+            {"name": "search_tool", "desc": "获取最新行业数据、统计报告"},
+            {"name": "calculation_tool", "desc": "执行数值计算（增长率、占比等）"}
+        ],
+        system_prompt="你是智能助手，对话中若需要数据支持，需先调用search_tool获取准确数据，再用calculation_tool计算，最后用自然语言回复用户"
+    )
+
+    # 2. 手动指定 pipeline_class，无需传 task
+    # chatbot = pipeline(
+    #     model=model,
+    #     tokenizer=tokenizer,
+    #     pipeline_class=ConversationalPipeline  # 直接指定对话专用 Pipeline 类
+    # )
+    messages = [{"role": "user", "content": query}]
+    response = chatbot(messages)
+
+    return response
+
+
+def test_query_generate(model, tokenizer, query: str) -> str:
+    """基于模型 tokenizer_config.json文件的内容，根据 chat_template 重构查询：手动构建模型输入（精细化控制）"""
+    # 1. 定义对话历史
+    messages = [
+        {"role": "system", "content": "你是一个AI助手，简洁回答问题"},
+        {"role": "user", "content": query}
+    ]
+
+    # 2. 用chat_template格式化（add_generation_prompt=True表示要生成回复）
+    formatted_text = tokenizer.apply_chat_template(
+        messages,
+        add_generation_prompt=True,
+        return_tensors="pt"  # 返回PyTorch张量（模型输入格式）
+    )
+
+    # 3. 模型生成回复
+    response = model.generate(formatted_text, max_new_tokens=100)
+    # 4. 解码输出（自动忽略特殊Token）
+    response = tokenizer.decode(response[0], skip_special_tokens=False)  # 不跳过特殊Token可看完整格式
+    return response
+
 
 def main():
     # 加载微调后的模型
@@ -84,7 +131,11 @@ def main():
 
             # 生成响应
 
-            response = test_function_calling(fine_tuned_model, tokenizer, user_input)
+            # response = test_function_calling(fine_tuned_model, tokenizer, user_input)
+            #
+            # response = test_query_pipeline(fine_tuned_model, tokenizer, user_input)
+
+            response = test_query_generate(fine_tuned_model, tokenizer, user_input)
 
             print(f"\n{'=' * 60}")
             print(f"用户: {user_input}")
