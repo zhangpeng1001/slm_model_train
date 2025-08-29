@@ -5,7 +5,7 @@ from peft import PeftModel
 
 # 配置路径
 base_model_path = r"E:\project\llm\model-data\base-models\Qwen3-0.6B"
-fine_tuned_model_path = r"E:\project\llm\model-data\train-models\Qwen3-multi-task"
+fine_tuned_model_path = r"E:\project\llm\model-data\train-models\Qwen3-multi-task-mt-gpu"
 
 
 def load_model_and_tokenizer():
@@ -56,6 +56,7 @@ def test_function_calling(model, tokenizer, query: str) -> str:
 
     return response
 
+
 # user 用户、assistant 助手、system 系统指令
 def test_query_pipeline(model, tokenizer, query: str) -> str:
     """基于模型 tokenizer_config.json文件的内容，根据 chat_template 重构查询：Hugging Face Pipeline（快速调用）"""
@@ -87,7 +88,20 @@ def test_query_generate(model, tokenizer, query: str) -> str:
     """基于模型 tokenizer_config.json文件的内容，根据 chat_template 重构查询：手动构建模型输入（精细化控制）"""
     # 1. 定义对话历史
     messages = [
-        {"role": "system", "content": "你是一个AI助手，简洁回答问题"},
+        # {"role": "system", "content": "你是一个AI助手，简洁回答问题"},
+        # {"role": "system", "content": "你是一个专业的数据提取助手。任务是分析用户输入的文本，提取用户描述的数据名称"},
+        # {"role": "system", "content": "你是一个专业的数据平台问答助手。任务是分析用户输入的问题，并提供答案给用户"},
+        # {"role": "system", "content": "你是一个专业的问题分类助手。任务是分析用户输入的文本，判断用户的问题类型是（数据平台相关、通用对话、无关问题）中哪一个"},
+        {"role": "system", "content":
+            "你是数据中台项目的工具调用助手，可以调用以下函数："
+            "\n- get_data_collection(file_name: str)：用于数据采集工具;"
+            "\n- query_data_by_filename(file_name: str)：用于文件信息查询工具;"
+            "\n- data_warehousing(file_name: str,target_db_name:str)：用于数据入库工具;"
+            "\n- data_service_publish(file_name: str)：用于数据发服务工具;"
+            "\n- data_quality_check(file_name: str,check_type:str)：用于数据质检工具;"
+            "\n请根据指令和输入,选择合适的函数并按指定格式调用。\n"
+            "如果需要调用函数，请使用以下格式：\n<tool_call>\n{\"name\":\"函数名\",\"parameters\":{\"参数名\":参数值}}\n</tool_call>\n"
+         },
         {"role": "user", "content": query}
     ]
 
@@ -95,13 +109,18 @@ def test_query_generate(model, tokenizer, query: str) -> str:
     formatted_text = tokenizer.apply_chat_template(
         messages,
         add_generation_prompt=True,
+        enable_thinking=False,  # 不进行思考
         return_tensors="pt"  # 返回PyTorch张量（模型输入格式）
     )
-
+    print(f"formatted_text:{formatted_text}")
     # 3. 模型生成回复
     response = model.generate(formatted_text, max_new_tokens=100)
     # 4. 解码输出（自动忽略特殊Token）
     response = tokenizer.decode(response[0], skip_special_tokens=False)  # 不跳过特殊Token可看完整格式
+    # 把输入信息去掉
+    print(f"response:{response}")
+    response = response[len(formatted_text):].strip()
+    print(f"response1:{response}")
     return response
 
 
