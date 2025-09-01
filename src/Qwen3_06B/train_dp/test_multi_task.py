@@ -88,20 +88,20 @@ def test_query_generate(model, tokenizer, query: str) -> str:
     """基于模型 tokenizer_config.json文件的内容，根据 chat_template 重构查询：手动构建模型输入（精细化控制）"""
     # 1. 定义对话历史
     messages = [
-        # {"role": "system", "content": "你是一个AI助手，简洁回答问题"},
+        # {"role": "system", "content": "你是中台AI助手，请回答问题"},
         # {"role": "system", "content": "你是一个专业的数据提取助手。任务是分析用户输入的文本，提取用户描述的数据名称"},
         # {"role": "system", "content": "你是一个专业的数据平台问答助手。任务是分析用户输入的问题，并提供答案给用户"},
-        # {"role": "system", "content": "你是一个专业的问题分类助手。任务是分析用户输入的文本，判断用户的问题类型是（数据平台相关、通用对话、无关问题）中哪一个"},
-        {"role": "system", "content":
-            "你是数据中台项目的工具调用助手，可以调用以下函数："
-            "\n- get_data_collection(file_name: str)：用于数据采集工具;"
-            "\n- query_data_by_filename(file_name: str)：用于文件信息查询工具;"
-            "\n- data_warehousing(file_name: str,target_db_name:str)：用于数据入库工具;"
-            "\n- data_service_publish(file_name: str)：用于数据发服务工具;"
-            "\n- data_quality_check(file_name: str,check_type:str)：用于数据质检工具;"
-            "\n请根据指令和输入,选择合适的函数并按指定格式调用。\n"
-            "如果需要调用函数，请使用以下格式：\n<tool_call>\n{\"name\":\"函数名\",\"parameters\":{\"参数名\":参数值}}\n</tool_call>\n"
-         },
+        {"role": "system", "content": "你是一个专业的问题分类助手。任务是分析用户输入的文本，判断用户的问题类型是（数据平台相关、通用对话、无关问题）中哪一个"},
+        # {"role": "system", "content":
+        #     "你是数据中台项目的工具调用助手，可以调用以下函数："
+        #     "\n- get_data_collection(file_name: str)：用于数据采集工具;"
+        #     "\n- query_data_by_filename(file_name: str)：用于文件信息查询工具;"
+        #     "\n- data_warehousing(file_name: str,target_db_name:str)：用于数据入库工具;"
+        #     "\n- data_service_publish(file_name: str)：用于数据发服务工具;"
+        #     "\n- data_quality_check(file_name: str,check_type:str)：用于数据质检工具;"
+        #     "\n请根据指令和输入,选择合适的函数并按指定格式调用。\n"
+        #     "如果需要调用函数，请使用以下格式：\n<tool_call>\n{\"name\":\"函数名\",\"parameters\":{\"参数名\":参数值}}\n</tool_call>\n"
+        #  },
         {"role": "user", "content": query}
     ]
 
@@ -112,16 +112,32 @@ def test_query_generate(model, tokenizer, query: str) -> str:
         enable_thinking=False,  # 不进行思考
         return_tensors="pt"  # 返回PyTorch张量（模型输入格式）
     )
-    print(f"formatted_text:{formatted_text}")
+    # print(f"formatted_text:{formatted_text}")
     # 3. 模型生成回复
     response = model.generate(formatted_text, max_new_tokens=100)
-    # 4. 解码输出（自动忽略特殊Token）
-    response = tokenizer.decode(response[0], skip_special_tokens=False)  # 不跳过特殊Token可看完整格式
-    # 把输入信息去掉
-    print(f"response:{response}")
-    response = response[len(formatted_text):].strip()
-    print(f"response1:{response}")
-    return response
+
+    # 4. 解码输出（保留特殊Token用于定位）
+    full_response = tokenizer.decode(response[0], skip_special_tokens=False)
+
+    # 5. 提取assistant的回复部分（去除输入的对话历史）
+    # 先将formatted_text解码为字符串，用于计算偏移量
+    formatted_str = tokenizer.decode(formatted_text[0], skip_special_tokens=False)
+    assistant_response = full_response[len(formatted_str):].strip()
+
+    return assistant_response
+    # 6. 提取<tool_call>和</tool_call>之间的内容
+    # start_tag = "<tool_call>"
+    # end_tag = "</tool_call>"
+    # start_idx = assistant_response.find(start_tag)
+    # end_idx = assistant_response.find(end_tag)
+    #
+    # if start_idx != -1 and end_idx != -1:
+    #     # 提取标签内的内容（包含标签本身）
+    #     tool_call_content = assistant_response[start_idx:end_idx + len(end_tag)]
+    #     return tool_call_content
+    # else:
+    #     # 如果没有找到工具调用标签，返回空字符串或提示信息
+    #     return ""
 
 
 def main():

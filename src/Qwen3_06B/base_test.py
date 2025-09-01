@@ -10,6 +10,10 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto"
 )
 
+#
+# for name, _ in model.named_modules():
+#     print(name)  # 输出所有模块的完整名称
+
 # prepare the model input
 prompt = "给我一个关于大型语言模型的简短介绍。"
 messages = [
